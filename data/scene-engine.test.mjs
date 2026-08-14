@@ -1,19 +1,19 @@
 import assert from "node:assert/strict";
-import question from "./sample-question.json" with { type: "json" };
+import questions from "./question-bank.json" with { type: "json" };
 import { buildScenes, validateQuestion } from "./scene-engine.js";
 
-assert.equal(validateQuestion(question), true);
+assert.ok(questions.length >= 1, "Question bank must not be empty");
 
-const scenes = buildScenes(question);
-assert.equal(scenes.length, 6);
-assert.deepEqual(
-  scenes.map((scene) => scene.id),
-  ["QUESTION", "ANSWER_PROPOSAL", "CLINICAL_REASONING", "DISTRACTORS", "EXAM_TRAP", "TAKE_HOME"]
-);
+for (const question of questions) {
+  assert.equal(validateQuestion(question), true);
+  const scenes = buildScenes(question);
+  assert.equal(scenes.length, 6, `${question.id}: expected 6 scenes`);
+  assert.deepEqual(scenes.map((scene) => scene.id), [
+    "QUESTION", "ANSWER_PROPOSAL", "CLINICAL_REASONING", "DISTRACTORS", "EXAM_TRAP", "TAKE_HOME"
+  ]);
+  assert.ok(scenes[1].dialogue.some((item) => item.name === "DR. ANAS"));
+  assert.ok(scenes[2].dialogue.some((item) => item.name === "TEACHER"));
+  assert.ok(scenes[5].visual.includes(question.source_indicated_answer));
+}
 
-assert.ok(scenes[0].dialogue.length > 0);
-assert.ok(scenes[1].dialogue.some((item) => item.parts.some((part) => part.text.includes("Stomach then small bowel then colon"))));
-assert.ok(scenes[3].dialogue.some((item) => item.parts.some((part) => part.text.startsWith("A."))));
-assert.ok(scenes[5].dialogue.some((item) => item.parts.some((part) => part.text.includes("Stomach → Small bowel → Colon"))));
-
-console.log("Scene engine tests passed.");
+console.log(`Scene engine tests passed for ${questions.length} question(s).`);
