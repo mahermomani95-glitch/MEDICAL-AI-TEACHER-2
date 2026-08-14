@@ -384,59 +384,45 @@ function renderQuestion() {
    ========================================= */
 
 function renderDialogue(dialogue) {
-
   const container = document.createElement("div");
-
   container.className = "dialogue-list";
+
+  let currentBlock = null;
+  let currentSpeaker = null;
 
   dialogue.forEach((item) => {
 
-    const block = document.createElement("div");
+    if (item.name !== currentSpeaker) {
+      currentSpeaker = item.name;
 
-    block.className = "dialogue-block";
+      currentBlock = document.createElement("div");
+      currentBlock.className = "dialogue-block";
 
-    /* Speaker name is ALWAYS LTR */
+      const speakerName = document.createElement("div");
+      speakerName.className = "speaker-name";
+      speakerName.dir = "ltr";
+      speakerName.textContent = `${item.name}:`;
 
-    const speakerName = document.createElement("div");
-
-    speakerName.className = "speaker-name";
-    speakerName.dir = "ltr";
-    speakerName.textContent = `${item.name}:`;
-
-    block.appendChild(speakerName);
-
-
-    /* Render each language separately */
+      currentBlock.appendChild(speakerName);
+      container.appendChild(currentBlock);
+    }
 
     item.parts.forEach((part) => {
-
       const line = document.createElement("div");
 
       if (part.type === "ar") {
-
         line.className = "arabic-line";
-
         line.dir = "rtl";
-
         line.lang = "ar";
-
       } else {
-
         line.className = "english-line";
-
         line.dir = "ltr";
-
         line.lang = "en";
-
       }
 
       line.textContent = part.text;
-
-      block.appendChild(line);
-
+      currentBlock.appendChild(line);
     });
-
-    container.appendChild(block);
 
   });
 
