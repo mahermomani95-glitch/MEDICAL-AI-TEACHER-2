@@ -9,7 +9,8 @@
     "build": "vite build",
     "test:scene-engine": "node data/scene-engine.test.mjs",
     "test:video-script": "node data/video-script.test.mjs",
-    "test": "npm run test:scene-engine && npm run test:video-script",
+    "test:video-engine": "node data/video-engine.test.mjs",
+    "test": "npm run test:scene-engine && npm run test:video-script && npm run test:video-engine",
     "preview": "vite preview"
   },
   "devDependencies": {
