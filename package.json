@@ -8,7 +8,8 @@
     "dev": "vite",
     "build": "vite build",
     "test:scene-engine": "node data/scene-engine.test.mjs",
-    "test": "npm run test:scene-engine",
+    "test:video-script": "node data/video-script.test.mjs",
+    "test": "npm run test:scene-engine && npm run test:video-script",
     "preview": "vite preview"
   },
   "devDependencies": {
