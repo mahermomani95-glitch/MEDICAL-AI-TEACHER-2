@@ -255,5 +255,37 @@ footer {
 
     flex-direction: column;
   }
+.dialogue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
 
+.dialogue-block {
+  margin-bottom: 4px;
+}
+
+.speaker-name {
+  color: #8fc5ee;
+  font-weight: 800;
+  margin-bottom: 8px;
+  text-align: left;
+  direction: ltr;
+}
+
+.arabic-line {
+  direction: rtl;
+  text-align: right;
+  unicode-bidi: plaintext;
+  line-height: 1.9;
+  margin-bottom: 6px;
+}
+
+.english-line {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: plaintext;
+  line-height: 1.7;
+  margin-bottom: 6px;
+}
 }
