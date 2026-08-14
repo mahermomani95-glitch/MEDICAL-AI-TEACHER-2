@@ -1,0 +1,22 @@
+name: Production config validation
+
+on:
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate production contract
+        run: node data/validate-production-config.mjs
+      - name: Run production contract tests
+        run: node data/production-config.test.mjs
