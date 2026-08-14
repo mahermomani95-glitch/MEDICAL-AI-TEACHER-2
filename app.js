@@ -3,40 +3,75 @@ import question from "./data/sample-question.json" with { type: "json" };
 const q = question;
 let currentScene = 0;
 
-const LTR = (text) => `<span dir="ltr" class="ltr-text">${text}</span>`;
+/* =========================================
+   MEDICAL AI TEACHER
+   Structured bilingual dialogue engine
+   ========================================= */
+
+const AR = (text) => ({
+  type: "ar",
+  text
+});
+
+const EN = (text) => ({
+  type: "en",
+  text
+});
+
+const SPEAKER = (name, ...parts) => ({
+  type: "speaker",
+  name,
+  parts
+});
+
+
+/* =========================================
+   TEACHING SCENES
+   ========================================= */
 
 const scenes = [
+
+  /* ================= SCENE 01 ================= */
+
   {
     label: "SCENE 01 · QUESTION",
+
     visual: `
       <div class="flow">
-        Clinical Question<br>
+        CLINICAL QUESTION<br>
         ↓<br>
-        Read the clues<br>
+        READ THE CLUES<br>
         ↓<br>
-        Identify what is being tested
+        IDENTIFY WHAT IS BEING TESTED
       </div>
     `,
-    dialogue: `
-      <p dir="rtl">
-        <strong dir="ltr">MAHER:</strong>
-        دكتور، قبل ما نختار الإجابة، خلينا نفهم السؤال أول.
-      </p>
 
-      <p dir="rtl">
-        <strong dir="ltr">DR. ANAS:</strong>
-        السؤال يسأل عن الترتيب الحقيقي لمسار الجهاز الهضمي.
-      </p>
+    dialogue: [
 
-      <p dir="rtl">
-        <strong dir="ltr">TEACHER:</strong>
-        ممتاز. لا تحفظ الاختيار مباشرة. أول شيء حدّد المسار الطبيعي.
-      </p>
-    `
+      SPEAKER(
+        "MAHER",
+        AR("دكتور، قبل ما نختار الإجابة، خلينا نفهم السؤال أول.")
+      ),
+
+      SPEAKER(
+        "DR. ANAS",
+        AR("السؤال يسأل عن الترتيب الحقيقي لمسار الجهاز الهضمي.")
+      ),
+
+      SPEAKER(
+        "TEACHER",
+        AR("ممتاز. لا تحفظ الاختيار مباشرة. أول شيء حدّد المسار الطبيعي.")
+      )
+
+    ]
   },
+
+
+  /* ================= SCENE 02 ================= */
 
   {
     label: "SCENE 02 · ANSWER PROPOSAL",
+
     visual: `
       <div class="flow">
         STOMACH<br>
@@ -46,26 +81,33 @@ const scenes = [
         COLON
       </div>
     `,
-    dialogue: `
-      <p dir="rtl">
-        <strong dir="ltr">DR. ANAS:</strong>
-        أنا أميل إلى الخيار C.
-      </p>
 
-      <p dir="rtl">
-        <strong dir="ltr">DR. ANAS:</strong>
-        ${LTR("Stomach → Small bowel → Colon")}
-      </p>
+    dialogue: [
 
-      <p dir="rtl">
-        <strong dir="ltr">TEACHER:</strong>
-        جيد. الآن لازم نثبت لماذا C صحيحة.
-      </p>
-    `
+      SPEAKER(
+        "DR. ANAS",
+        AR("أنا أميل إلى الخيار C.")
+      ),
+
+      SPEAKER(
+        "DR. ANAS",
+        EN("Stomach → Small bowel → Colon")
+      ),
+
+      SPEAKER(
+        "TEACHER",
+        AR("جيد. الآن لازم نثبت لماذا C صحيحة.")
+      )
+
+    ]
   },
+
+
+  /* ================= SCENE 03 ================= */
 
   {
     label: "SCENE 03 · CLINICAL REASONING",
+
     visual: `
       <div class="flow">
         STOMACH<br>
@@ -76,30 +118,38 @@ const scenes = [
         <small>Normal physiological sequence</small>
       </div>
     `,
-    dialogue: `
-      <p dir="rtl">
-        <strong dir="ltr">TEACHER:</strong>
-        حسب المصدر، الخيار C يصف المسار الفسيولوجي الطبيعي.
-      </p>
 
-      <p dir="rtl">
-        الطعام ينتقل من المعدة إلى الأمعاء الدقيقة ثم إلى القولون.
-      </p>
+    dialogue: [
 
-      <p dir="rtl">
-        <strong dir="ltr">MAHER:</strong>
-        يعني المفتاح هو ترتيب الجهاز الهضمي الطبيعي.
-      </p>
+      SPEAKER(
+        "TEACHER",
+        AR("حسب المصدر، الخيار C يصف المسار الفسيولوجي الطبيعي.")
+      ),
 
-      <p dir="rtl">
-        <strong dir="ltr">TEACHER:</strong>
-        بالضبط.
-      </p>
-    `
+      SPEAKER(
+        "TEACHER",
+        AR("الطعام ينتقل من المعدة إلى الأمعاء الدقيقة ثم إلى القولون.")
+      ),
+
+      SPEAKER(
+        "MAHER",
+        AR("يعني المفتاح هو ترتيب الجهاز الهضمي الطبيعي.")
+      ),
+
+      SPEAKER(
+        "TEACHER",
+        AR("بالضبط.")
+      )
+
+    ]
   },
+
+
+  /* ================= SCENE 04 ================= */
 
   {
     label: "SCENE 04 · DISTRACTORS",
+
     visual: `
       <div class="flow">
         ❌ A<br>
@@ -109,85 +159,111 @@ const scenes = [
         ❌ E
       </div>
     `,
-    dialogue: `
-      <p dir="rtl">
-        <strong dir="ltr">TEACHER:</strong>
-        الخيارات الأخرى تغيّر أو تعكس ترتيب المسار الطبيعي.
-      </p>
 
-      <p dir="ltr">
-        <strong>A:</strong>
-        Stomach → Colon → Small bowel
-      </p>
+    dialogue: [
 
-      <p dir="rtl">
-        ❌ ترتيب غير صحيح.
-      </p>
+      SPEAKER(
+        "TEACHER",
+        AR("الخيارات الأخرى تغيّر أو تعكس ترتيب المسار الطبيعي.")
+      ),
 
-      <p dir="ltr">
-        <strong>B:</strong>
-        Colon → Small bowel → Stomach
-      </p>
+      SPEAKER(
+        "A",
+        EN("Stomach → Colon → Small bowel")
+      ),
 
-      <p dir="rtl">
-        ❌ ترتيب معكوس بالنسبة للمسار الطبيعي.
-      </p>
+      SPEAKER(
+        "TEACHER",
+        AR("❌ ترتيب غير صحيح.")
+      ),
 
-      <p dir="ltr">
-        <strong>D:</strong>
-        Small bowel → Stomach → Colon
-      </p>
+      SPEAKER(
+        "B",
+        EN("Colon → Small bowel → Stomach")
+      ),
 
-      <p dir="rtl">
-        ❌ يبدأ من الأمعاء الدقيقة بدل المعدة.
-      </p>
+      SPEAKER(
+        "TEACHER",
+        AR("❌ ترتيب معكوس بالنسبة للمسار الطبيعي.")
+      ),
 
-      <p dir="ltr">
-        <strong>E:</strong>
-        Small bowel → Colon → Stomach
-      </p>
+      SPEAKER(
+        "D",
+        EN("Small bowel → Stomach → Colon")
+      ),
 
-      <p dir="rtl">
-        ❌ لا يمثل التسلسل الطبيعي.
-      </p>
-    `
+      SPEAKER(
+        "TEACHER",
+        AR("❌ يبدأ من الأمعاء الدقيقة بدل المعدة.")
+      ),
+
+      SPEAKER(
+        "E",
+        EN("Small bowel → Colon → Stomach")
+      ),
+
+      SPEAKER(
+        "TEACHER",
+        AR("❌ لا يمثل التسلسل الطبيعي.")
+      )
+
+    ]
   },
+
+
+  /* ================= SCENE 05 ================= */
 
   {
     label: "SCENE 05 · EXAM TRAP",
+
     visual: `
       <div class="flow">
         ⚠️ EXAM TRAP<br><br>
-        Do not overthink the sequence<br>
+        DO NOT OVERTHINK<br>
         ↓<br>
-        Follow normal physiology
+        FOLLOW NORMAL PHYSIOLOGY
       </div>
     `,
-    dialogue: `
-      <p dir="rtl">
-        <strong dir="ltr">MAHER:</strong>
-        وين الفخ بالسؤال؟
-      </p>
 
-      <p dir="rtl">
-        <strong dir="ltr">TEACHER:</strong>
-        الفخ إنك تنجذب للخيارات التي تحتوي على أعضاء صحيحة،
-        لكن الترتيب الكامل هو المهم.
-      </p>
+    dialogue: [
 
-      <p dir="rtl">
-        <strong dir="ltr">TEACHER:</strong>
-        لما يكون السؤال عن المسار الطبيعي، ارجع للـ
-        ${LTR("normal physiology")}
-        الأساسية.
-      </p>
-    `
+      SPEAKER(
+        "MAHER",
+        AR("وين الفخ بالسؤال؟")
+      ),
+
+      SPEAKER(
+        "TEACHER",
+        AR("الفخ إنك تنجذب للخيارات التي تحتوي على أعضاء صحيحة، لكن الترتيب الكامل هو المهم.")
+      ),
+
+      SPEAKER(
+        "TEACHER",
+        AR("لما يكون السؤال عن المسار الطبيعي، ارجع إلى:")
+      ),
+
+      SPEAKER(
+        "TEACHER",
+        EN("Normal physiology")
+      ),
+
+      SPEAKER(
+        "TEACHER",
+        AR("ولا تحفظ حرف الإجابة فقط.")
+      )
+
+    ]
   },
+
+
+  /* ================= SCENE 06 ================= */
 
   {
     label: "SCENE 06 · TAKE HOME",
+
     visual: `
       <div class="flow">
+
         🎯 TRIGGER<br>
         Normal GI sequence<br><br>
 
@@ -195,123 +271,231 @@ const scenes = [
         STOMACH → SMALL BOWEL → COLON<br><br>
 
         ANSWER: C
+
       </div>
     `,
-    dialogue: `
-      <p dir="rtl">
-        <strong dir="ltr">TEACHER:</strong>
-        احفظها كـ
-        ${LTR("memory anchor")}
-        :
-      </p>
 
-      <p dir="ltr">
-        <strong>Stomach → Small bowel → Colon</strong>
-      </p>
+    dialogue: [
 
-      <p dir="rtl">
-        <strong dir="ltr">TEACHER:</strong>
-        إذن الإجابة الصحيحة هي C.
-      </p>
+      SPEAKER(
+        "TEACHER",
+        AR("احفظها كـ:")
+      ),
 
-      <p dir="rtl">
-        <strong dir="ltr">DR. ANAS:</strong>
-        واضح. أفهم المسار أولاً بدل ما أحفظ الحرف.
-      </p>
+      SPEAKER(
+        "TEACHER",
+        EN("Memory anchor")
+      ),
 
-      <p dir="rtl">
-        <strong dir="ltr">TEACHER:</strong>
-        وهذا هو المطلوب في الـ
-        ${LTR("clinical reasoning")}
-        .
-      </p>
-    `
+      SPEAKER(
+        "TEACHER",
+        EN("Stomach → Small bowel → Colon")
+      ),
+
+      SPEAKER(
+        "TEACHER",
+        AR("إذن الإجابة الصحيحة هي C.")
+      ),
+
+      SPEAKER(
+        "DR. ANAS",
+        AR("واضح. أفهم المسار أولاً بدل ما أحفظ الحرف.")
+      ),
+
+      SPEAKER(
+        "TEACHER",
+        AR("وهذا هو المطلوب في:")
+      ),
+
+      SPEAKER(
+        "TEACHER",
+        EN("Clinical reasoning")
+      )
+
+    ]
   }
+
 ];
 
 
-/* =========================
-   QUESTION
-========================= */
+/* =========================================
+   QUESTION RENDERER
+   ========================================= */
 
 function renderQuestion() {
 
-  document.querySelector("#question").textContent =
-    q.question;
+  const questionEl = document.querySelector("#question");
+  const arabicEl = document.querySelector("#arabic");
+  const optionsEl = document.querySelector("#options");
 
-  document.querySelector("#arabic").textContent =
-    q.arabic;
+  if (!questionEl || !arabicEl || !optionsEl) {
+    return;
+  }
 
-  const options =
-    document.querySelector("#options");
+  questionEl.textContent = q.question;
+  arabicEl.textContent = q.arabic;
 
-  options.innerHTML = "";
+  optionsEl.innerHTML = "";
 
   q.options.forEach((item) => {
 
-    const el = document.createElement("div");
+    const option = document.createElement("div");
 
-    el.className = "option";
+    option.className = "option";
 
     if (item.letter === q.source_indicated_answer) {
-      el.classList.add("correct");
+      option.classList.add("correct");
     }
 
-    el.innerHTML = `
-      <span class="letter">${item.letter}.</span>
-      ${item.text}
-      ${
-        item.letter === q.source_indicated_answer
-          ? `<span style="float:right">✓</span>`
-          : ""
-      }
-    `;
+    const letter = document.createElement("span");
 
-    options.appendChild(el);
+    letter.className = "letter";
+    letter.dir = "ltr";
+    letter.textContent = `${item.letter}.`;
+
+    const text = document.createElement("span");
+
+    text.className = "option-text";
+    text.dir = "ltr";
+    text.textContent = item.text;
+
+    option.appendChild(letter);
+    option.appendChild(text);
+
+    if (item.letter === q.source_indicated_answer) {
+
+      const check = document.createElement("span");
+
+      check.className = "option-check";
+      check.dir = "ltr";
+      check.textContent = "✓";
+
+      option.appendChild(check);
+    }
+
+    optionsEl.appendChild(option);
 
   });
 }
 
 
-/* =========================
-   SCENE
-========================= */
+/* =========================================
+   DIALOGUE RENDERER
+   ========================================= */
+
+function renderDialogue(dialogue) {
+
+  const container = document.createElement("div");
+
+  container.className = "dialogue-list";
+
+  dialogue.forEach((item) => {
+
+    const block = document.createElement("div");
+
+    block.className = "dialogue-block";
+
+    /* Speaker name is ALWAYS LTR */
+
+    const speakerName = document.createElement("div");
+
+    speakerName.className = "speaker-name";
+    speakerName.dir = "ltr";
+    speakerName.textContent = `${item.name}:`;
+
+    block.appendChild(speakerName);
+
+
+    /* Render each language separately */
+
+    item.parts.forEach((part) => {
+
+      const line = document.createElement("div");
+
+      if (part.type === "ar") {
+
+        line.className = "arabic-line";
+
+        line.dir = "rtl";
+
+        line.lang = "ar";
+
+      } else {
+
+        line.className = "english-line";
+
+        line.dir = "ltr";
+
+        line.lang = "en";
+
+      }
+
+      line.textContent = part.text;
+
+      block.appendChild(line);
+
+    });
+
+    container.appendChild(block);
+
+  });
+
+  return container;
+}
+
+
+/* =========================================
+   SCENE RENDERER
+   ========================================= */
 
 function renderScene() {
 
   const scene = scenes[currentScene];
 
-  document.querySelector("#sceneLabel").textContent =
-    scene.label;
+  const label = document.querySelector("#sceneLabel");
+  const visual = document.querySelector("#visual");
+  const dialogue = document.querySelector("#dialogue");
+  const next = document.querySelector("#next");
 
-  document.querySelector("#visual").innerHTML =
-    scene.visual;
+  if (!label || !visual || !dialogue || !next) {
+    return;
+  }
 
-  document.querySelector("#dialogue").innerHTML =
-    scene.dialogue;
+  label.textContent = scene.label;
 
-  const button =
-    document.querySelector("#next");
+  visual.innerHTML = scene.visual;
 
-  button.textContent =
+  dialogue.innerHTML = "";
+
+  dialogue.appendChild(
+    renderDialogue(scene.dialogue)
+  );
+
+  next.textContent =
     currentScene === scenes.length - 1
       ? "Restart teaching →"
       : "Next teaching scene →";
 }
 
 
-/* =========================
-   NEXT
-========================= */
+/* =========================================
+   NEXT SCENE
+   ========================================= */
 
-document.querySelector("#next").addEventListener(
-  "click",
-  () => {
+const nextButton = document.querySelector("#next");
 
-    if (currentScene === scenes.length - 1) {
+if (nextButton) {
+
+  nextButton.addEventListener("click", () => {
+
+    if (currentScene >= scenes.length - 1) {
+
       currentScene = 0;
+
     } else {
+
       currentScene++;
+
     }
 
     renderScene();
@@ -321,13 +505,15 @@ document.querySelector("#next").addEventListener(
       behavior: "smooth"
     });
 
-  }
-);
+  });
+
+}
 
 
-/* =========================
-   START
-========================= */
+/* =========================================
+   START APPLICATION
+   ========================================= */
 
 renderQuestion();
+
 renderScene();
