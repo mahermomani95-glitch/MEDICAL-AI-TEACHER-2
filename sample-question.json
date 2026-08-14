@@ -1,0 +1,52 @@
+{
+  "id": "surgery-2013-06-001",
+  "source": "All medical questions(4).pdf",
+  "question": "The true arrangement for gastrointestinal tract recovery after any abdominal surgery?",
+  "arabic": "ما هو الترتيب الحقيقي لتعافي الجهاز الهضمي بعد أي عملية جراحية في البطن؟",
+  "options": [
+    {
+      "letter": "A",
+      "text": "Stomach then colon then small bowel"
+    },
+    {
+      "letter": "B",
+      "text": "Colon then small bowel then stomach"
+    },
+    {
+      "letter": "C",
+      "text": "Stomach then small bowel then colon"
+    },
+    {
+      "letter": "D",
+      "text": "Small bowel then stomach then colon"
+    },
+    {
+      "letter": "E",
+      "text": "Small bowel then colon then stomach"
+    }
+  ],
+  "source_indicated_answer": "C",
+  "teaching": {
+    "trigger": [
+      "normal physiological sequence"
+    ],
+    "reasoning": "The source explanation under option C describes the normal physiological pathway as stomach → small bowel → colon.",
+    "distractors": "Each distractor reverses or alters the normal sequence.",
+    "memory_anchor": "Stomach → Small bowel → Colon"
+  },
+  "dialogue": {
+    "characters": [
+      "MAHER",
+      "DR. ANAS",
+      "TEACHER"
+    ],
+    "rule": "Dr. Anas proposes first; Teacher evaluates and teaches."
+  },
+  "scenes": [
+    "Question",
+    "Answer proposal",
+    "Clinical reasoning",
+    "Take-home message"
+  ],
+  "voiceScriptReady": true
+}

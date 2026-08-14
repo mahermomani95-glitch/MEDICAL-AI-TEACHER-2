@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Medical AI Teacher</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="brand">MEDICAL AI TEACHER</div>
+      <div class="subtitle">MCQ → Clinical Reasoning → Teaching Video</div>
+    </div>
+    <div class="badge">Prototype 01</div>
+  </header>
+
+  <main class="layout">
+    <section class="left">
+      <div class="label">QUESTION</div>
+      <h1 id="question"></h1>
+      <p id="arabic" class="arabic"></p>
+      <div id="options" class="options"></div>
+      <button id="next" class="next">Next teaching scene →</button>
+    </section>
+
+    <aside class="right">
+      <div class="scene-label" id="sceneLabel">SCENE 01 · QUESTION</div>
+      <div id="visual" class="visual"></div>
+      <div id="dialogue" class="dialogue"></div>
+    </aside>
+  </main>
+
+  <footer>
+    <span>Teacher • Maher • Dr. Anas • Aoun • Abu Qalaq</span>
+    <span>Source-fidelity workflow</span>
+  </footer>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
