@@ -1,1 +1,0 @@
-Production configuration CI is defined in .github/workflows/production-config.yml.
