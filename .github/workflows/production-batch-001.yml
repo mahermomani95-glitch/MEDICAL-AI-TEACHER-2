@@ -11,17 +11,12 @@ permissions:
 
 env:
   NODE_VERSION: 22
-  VOICE_01_URL: https://www.aidocmaker.com/g0/audio?name=20d68d09d3db4b689f021b8645c7c287
-  VOICE_02_URL: https://www.aidocmaker.com/g0/audio?name=febeb1b808d742dc8c0fe00130f76f6d
-  VOICE_03_URL: https://www.aidocmaker.com/g0/audio?name=63407e0aa5e4484886d61a234a233b35
-  VOICE_04_URL: https://www.aidocmaker.com/g0/audio?name=7cab004c75914708ab7c51c303f9f51f
-  VOICE_05_URL: https://www.aidocmaker.com/g0/audio?name=95702b1effba4d9d86ca6d59ffbc6293
-  VOICE_06_URL: https://www.aidocmaker.com/g0/audio?name=c2530e41037540fdad6913ea1ff401f2
+  TTS_VOICE: af_nova
 
 jobs:
   produce-q0001:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,16 +25,41 @@ jobs:
           set -euo pipefail
           command -v ffmpeg >/dev/null || sudo apt-get install -y ffmpeg
           ffmpeg -version | head -n 1
-      - name: Download and assemble voice
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install HyperFrames
+        run: npm install --no-save hyperframes
+      - name: Check TTS voices
+        run: npx hyperframes tts --list
+      - name: Generate production narration locally
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p production/audio
+          mkdir -p production/audio production/render
+          cat > production/audio/01.txt <<'EOF'
+In obstructive jaundice, bleeding tendency is due to deficiency of the following clotting factors except? The options are factor two, factor seven, factor eight, factor nine and factor ten. Dr. Anas proposes factor eight.
+EOF
+          cat > production/audio/02.txt <<'EOF'
+Correct. Factor eight is the exception. The key is to recognize which clotting factors depend on vitamin K.
+EOF
+          cat > production/audio/03.txt <<'EOF'
+Obstructive jaundice reduces bile delivery to the intestine. This impairs absorption of fat-soluble vitamin K. As a result, vitamin K-dependent clotting factors, especially factors two, seven, nine and ten, decrease.
+EOF
+          cat > production/audio/04.txt <<'EOF'
+Why are the other choices wrong? Factors two, seven, nine and ten are vitamin K dependent, so they are reduced when vitamin K absorption is impaired. Factor eight is not vitamin K dependent, so it is the exception.
+EOF
+          cat > production/audio/05.txt <<'EOF'
+Exam trap: do not confuse factor eight with the vitamin K-dependent factors. The high-yield sequence is two, seven, nine and ten.
+EOF
+          cat > production/audio/06.txt <<'EOF'
+Take-home: obstructive jaundice means reduced vitamin K absorption and reduced factors two, seven, nine and ten. Factor eight is the exception.
+EOF
           for n in 01 02 03 04 05 06; do
-            url="$(printenv VOICE_${n}_URL)"
-            curl --http1.1 -fL --retry 5 --retry-all-errors --retry-delay 2 -A "Mozilla/5.0" "$url" -o "production/audio/${n}.mp3"
-            test -s "production/audio/${n}.mp3"
-            ffprobe -v error -show_entries format=format_name,duration -of default=noprint_wrappers=1 "production/audio/${n}.mp3"
+            npx hyperframes tts "production/audio/${n}.txt" --voice "$TTS_VOICE" --output "production/audio/${n}.wav"
+            test -s "production/audio/${n}.wav"
+            ffprobe -v error -show_entries format=format_name,duration -of default=noprint_wrappers=1 "production/audio/${n}.wav"
           done
           fit_audio() {
             local src="$1" dst="$2" target="$3"
@@ -48,22 +68,16 @@ jobs:
             ratio=$(awk -v d="$dur" -v t="$target" 'BEGIN { r=d/t; if (r<0.5) r=0.5; if (r>2) r=2; printf "%.6f", r }')
             ffmpeg -y -v error -i "$src" -af "atempo=${ratio},apad" -t "$target" -ar 48000 -ac 2 -c:a pcm_s16le "$dst"
           }
-          fit_audio production/audio/01.mp3 production/audio/01.wav 10
-          fit_audio production/audio/02.mp3 production/audio/02.wav 8
-          fit_audio production/audio/03.mp3 production/audio/03.wav 12
-          fit_audio production/audio/04.mp3 production/audio/04.wav 12
-          fit_audio production/audio/05.mp3 production/audio/05.wav 10
-          fit_audio production/audio/06.mp3 production/audio/06.wav 8
-          printf "file '%s'\n" "$PWD/production/audio/01.wav" "$PWD/production/audio/02.wav" "$PWD/production/audio/03.wav" "$PWD/production/audio/04.wav" "$PWD/production/audio/05.wav" "$PWD/production/audio/06.wav" > production/audio/concat.txt
+          fit_audio production/audio/01.wav production/audio/01-fit.wav 10
+          fit_audio production/audio/02.wav production/audio/02-fit.wav 8
+          fit_audio production/audio/03.wav production/audio/03-fit.wav 12
+          fit_audio production/audio/04.wav production/audio/04-fit.wav 12
+          fit_audio production/audio/05.wav production/audio/05-fit.wav 10
+          fit_audio production/audio/06.wav production/audio/06-fit.wav 8
+          printf "file '%s'\n" "$PWD/production/audio/01-fit.wav" "$PWD/production/audio/02-fit.wav" "$PWD/production/audio/03-fit.wav" "$PWD/production/audio/04-fit.wav" "$PWD/production/audio/05-fit.wav" "$PWD/production/audio/06-fit.wav" > production/audio/concat.txt
           ffmpeg -y -v error -f concat -safe 0 -i production/audio/concat.txt -c:a pcm_s16le production/render/master-voice.wav
           ffmpeg -y -v error -i production/render/master-voice.wav -c:a libmp3lame -b:a 160k production/render/master-voice.mp3
           ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name -of json production/render/master-voice.mp3
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - name: Install HyperFrames
-        run: npm install --no-save hyperframes
       - name: Lint production composition
         run: npx hyperframes lint production/render
       - name: Visual inspect production composition
