@@ -18,7 +18,12 @@ permissions:
 
 env:
   NODE_VERSION: 22
-  VOICE_URL: https://www.aidocmaker.com/g0/audio?name=ad68c07c628c4d52b136040cfcf9d176
+  VOICE_01_URL: https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/638ea2eb-56b8-4040-b32a-c2ea4b1e3943.mp3
+  VOICE_02_URL: https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/0dcf0c5a-b3f4-4438-9ec8-a9eee753ac4d.mp3
+  VOICE_03_URL: https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/11673a16-baaa-4c79-b79e-cced9435011f.mp3
+  VOICE_04_URL: https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/32b59689-dae8-4224-8516-e19126c66a94.mp3
+  VOICE_05_URL: https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/da5207ba-cfaf-4571-9d16-d1e632f1af0d.mp3
+  VOICE_06_URL: https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/0470720c-37f8-4836-95a4-d2917edee8e6.mp3
 
 jobs:
   render-preview:
@@ -34,21 +39,41 @@ jobs:
           if command -v ffmpeg >/dev/null 2>&1; then
             echo "Using preinstalled FFmpeg: $(command -v ffmpeg)"
           else
-            echo "FFmpeg is not preinstalled; installing from the runner package cache"
             sudo apt-get install -y ffmpeg
           fi
           ffmpeg -version | head -n 1
-      - name: Download master voice
+      - name: Download and assemble master voice
         shell: bash
         run: |
           set -euo pipefail
-          rm -f video/master-voice.mp3
-          curl --http1.1 -fL --retry 5 --retry-all-errors --retry-delay 2 \
-            -A "Mozilla/5.0" \
-            "$VOICE_URL" -o video/master-voice.mp3
-          test -s video/master-voice.mp3
-          file video/master-voice.mp3
-          ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 video/master-voice.mp3
+          mkdir -p video/audio
+          curl --http1.1 -fL --retry 5 --retry-all-errors --retry-delay 2 -A "Mozilla/5.0" "$VOICE_01_URL" -o video/audio/01.mp3
+          curl --http1.1 -fL --retry 5 --retry-all-errors --retry-delay 2 -A "Mozilla/5.0" "$VOICE_02_URL" -o video/audio/02.mp3
+          curl --http1.1 -fL --retry 5 --retry-all-errors --retry-delay 2 -A "Mozilla/5.0" "$VOICE_03_URL" -o video/audio/03.mp3
+          curl --http1.1 -fL --retry 5 --retry-all-errors --retry-delay 2 -A "Mozilla/5.0" "$VOICE_04_URL" -o video/audio/04.mp3
+          curl --http1.1 -fL --retry 5 --retry-all-errors --retry-delay 2 -A "Mozilla/5.0" "$VOICE_05_URL" -o video/audio/05.mp3
+          curl --http1.1 -fL --retry 5 --retry-all-errors --retry-delay 2 -A "Mozilla/5.0" "$VOICE_06_URL" -o video/audio/06.mp3
+          for f in video/audio/*.mp3; do
+            test -s "$f"
+            ffprobe -v error -show_entries format=format_name,duration -of default=noprint_wrappers=1 "$f"
+          done
+          fit_audio() {
+            local src="$1" dst="$2" target="$3"
+            local dur ratio
+            dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$src")
+            ratio=$(awk -v d="$dur" -v t="$target" 'BEGIN { r=d/t; if (r<0.5) r=0.5; if (r>2) r=2; printf "%.6f", r }')
+            ffmpeg -y -v error -i "$src" -af "atempo=${ratio},apad" -t "$target" -ar 48000 -ac 2 -c:a pcm_s16le "$dst"
+          }
+          fit_audio video/audio/01.mp3 video/audio/01.wav 10
+          fit_audio video/audio/02.mp3 video/audio/02.wav 8
+          fit_audio video/audio/03.mp3 video/audio/03.wav 12
+          fit_audio video/audio/04.mp3 video/audio/04.wav 12
+          fit_audio video/audio/05.mp3 video/audio/05.wav 10
+          fit_audio video/audio/06.mp3 video/audio/06.wav 8
+          printf "file '%s'\n" "$PWD/video/audio/01.wav" "$PWD/video/audio/02.wav" "$PWD/video/audio/03.wav" "$PWD/video/audio/04.wav" "$PWD/video/audio/05.wav" "$PWD/video/audio/06.wav" > video/audio/concat.txt
+          ffmpeg -y -v error -f concat -safe 0 -i video/audio/concat.txt -c:a pcm_s16le video/master-voice.wav
+          ffmpeg -y -v error -i video/master-voice.wav -c:a aac -b:a 160k video/master-voice.mp3
+          ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name -of json video/master-voice.mp3
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -63,7 +88,9 @@ jobs:
         run: npx hyperframes render video --output medical-ai-teacher-preview.mp4 --quality "${{ inputs.quality || 'standard' }}" --fps 30
       - name: Verify rendered media
         run: |
+          set -euo pipefail
           ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,width,height,r_frame_rate -of json medical-ai-teacher-preview.mp4
+          test "$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_type -of csv=p=0 medical-ai-teacher-preview.mp4)" = "audio"
       - name: Upload preview
         uses: actions/upload-artifact@v4
         with:
