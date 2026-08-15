@@ -14,7 +14,7 @@ env:
   TTS_VOICE: af_nova
 
 jobs:
-  produce-batch-001:
+  produce-q0001:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -31,7 +31,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: Install HyperFrames
         run: npm install --no-save hyperframes
-      - name: Install HyperFrames TTS runtime
+      - name: Install TTS runtime
         run: |
           set -euo pipefail
           python -m venv .tts-venv
@@ -40,65 +40,75 @@ jobs:
           python -m pip install --disable-pip-version-check --no-input kokoro-onnx soundfile
           python -c "import kokoro_onnx, soundfile; print('TTS runtime OK')"
           echo "HYPERFRAMES_PYTHON=$PWD/.tts-venv/bin/python" >> "$GITHUB_ENV"
-      - name: Check TTS voices
+      - name: Check TTS voice
         run: npx hyperframes tts --list
-      - name: Produce Batch 001
+      - name: Build q0001 narration from source script
+        run: |
+          set -euo pipefail
+          test -f production/scripts/surgery-1-0001.json
+          test -f production/render/index.html
+          mkdir -p production/audio production/output
+          python - <<'PY'
+          import json
+          d=json.load(open('production/scripts/surgery-1-0001.json'))
+          scenes=d['scenes']
+          assert len(scenes)==6
+          for i,s in enumerate(scenes,1):
+              open(f'production/audio/{i:02d}.txt','w',encoding='utf-8').write(s['narration'])
+          PY
+      - name: Generate and normalize six voice segments
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf production/work production/output
-          mkdir -p production/work production/output
-          python - <<'PY'
-          import html, json, os
-          data=json.load(open('production/batch-001.json'))
-          css='''*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07111F;color:#F7FAFC;font-family:Arial,sans-serif}.clip{visibility:hidden}[data-composition-id]{width:1920px;height:1080px;position:relative;overflow:hidden;background:radial-gradient(circle at 75% 20%,#123441 0,transparent 38%),#07111F}.scene{position:absolute;inset:0;padding:90px 150px 150px;display:flex;flex-direction:column;justify-content:center;gap:28px;opacity:0;visibility:hidden}.kicker{font-size:26px;letter-spacing:.08em;color:#19C3B1;font-weight:800}.title{font-size:58px;line-height:1.15;font-weight:800;max-width:1550px}.card{background:rgba(14,42,54,.92);border:2px solid rgba(139,233,224,.18);border-radius:30px;padding:38px 48px}.options{display:grid;grid-template-columns:1fr 1fr;gap:16px}.option{font-size:32px;padding:20px;border-radius:18px;background:rgba(255,255,255,.045)}.correct{border:2px solid #19C3B1}.line{font-size:34px;line-height:1.5}.memory{font-size:52px;color:#8BE9E0;font-weight:800}.caption{position:absolute;left:170px;right:170px;bottom:82px;z-index:20;display:flex;justify-content:center;opacity:0;visibility:hidden}.caption span{max-width:1500px;padding:12px 24px;border-radius:16px;background:rgba(0,0,0,.72);font-size:27px;line-height:1.35;text-align:center}.footer{position:absolute;bottom:42px;left:150px;right:150px;display:flex;justify-content:space-between;color:rgba(247,250,252,.58);font-size:19px}'''
-          for q in data['questions']:
-              num=int(q['id'].split('-')[-1]); n=f'{num:04d}'; work=f'production/work/q{n}'; os.makedirs(work,exist_ok=True)
-              opts=''.join(f'<div class="option {"correct" if i==q["correct_index"] else ""}">{chr(65+i)} — {html.escape(str(o))}</div>' for i,o in enumerate(q['options']))
-              answer=f'{q["correct_letter"]} — {html.escape(str(q["options"][q["correct_index"]]))}'
-              question=html.escape(q['question'])
-              specialty=html.escape(q['specialty']); year=html.escape(q['year']); qid=html.escape(q['id'])
-              captions=[f'{question}',f'Correct answer: {answer}.',f'Key point: the tested concept is {answer}.',f'Why? Review each option and identify why {answer} is the exception or best answer.',f'Exam trap: do not choose a distractor when the stem asks for the exception or best answer.',f'Take-home: remember the correct choice — {answer}.']
-              starts=[0,10,18,30,42,52]; durations=[10,8,12,12,10,8]
-              scenes=f'''<section id="scene-01" class="scene clip" data-start="0" data-duration="10"><div class="kicker">MEDICAL AI TEACHER · {specialty.upper()} {year}</div><div class="title">{question}</div><div class="card options">{opts}</div></section><section id="scene-02" class="scene clip" data-start="10" data-duration="8"><div class="kicker">ANSWER PROPOSAL · 02</div><div class="title">{answer}</div><div class="card"><div class="line">Dr. Anas proposes: {answer}.</div></div></section><section id="scene-03" class="scene clip" data-start="18" data-duration="12"><div class="kicker">CLINICAL REASONING · 03</div><div class="title">Understand the tested concept</div><div class="card"><div class="line">The correct choice is <b>{answer}</b>. Use the stem, options, and high-yield rule to reach the answer.</div></div></section><section id="scene-04" class="scene clip" data-start="30" data-duration="12"><div class="kicker">DISTRACTORS · 04</div><div class="title">Why are the other choices wrong?</div><div class="card"><div class="line">Compare every distractor with the stem. The best answer remains <b>{answer}</b>.</div></div></section><section id="scene-05" class="scene clip" data-start="42" data-duration="10"><div class="kicker">EXAM TRAP · 05</div><div class="title">Read the question wording carefully.</div><div class="card"><div class="line">Exception questions and best-answer questions are easy to reverse. Identify exactly what the stem asks.</div></div></section><section id="scene-06" class="scene clip" data-start="52" data-duration="8"><div class="kicker">TAKE HOME · 06</div><div class="title">Take-home</div><div class="memory">{answer}</div><div class="line">Correct answer for {qid}.</div></section>'''
-              caps=''.join(f'<div id="caption-{i:02d}" class="caption clip" data-start="{s}" data-duration="{d}"><span>{html.escape(c)}</span></div>' for i,(s,d,c) in enumerate(zip(starts,durations,captions),1))
-              js="""(function(){const r=document.getElementById('medical-ai-master'),e=[...r.querySelectorAll('.scene')],c=[...r.querySelectorAll('.caption')];function v(x,on){x.style.opacity=on?'1':'0';x.style.visibility=on?'visible':'hidden'}function seek(t){e.forEach(x=>v(x,t>=+x.dataset.start&&t<+x.dataset.start+ +x.dataset.duration));c.forEach(x=>v(x,t>=+x.dataset.start&&t<+x.dataset.start+ +x.dataset.duration))}window.__timelines=window.__timelines||{};window.__timelines['medical-ai-master']={seek,progress:seek,totalDuration:60,duration:60};seek(0)})();"""
-              open(f'{work}/index.html','w').write(f'<!doctype html><html><head><meta charset="utf-8"><title>Medical AI Teacher — {qid}</title><style>{css}</style></head><body><div id="medical-ai-master" data-composition-id="medical-ai-master" data-start="0" data-duration="60" data-fps="30" data-width="1920" data-height="1080"><audio id="master-voice" src="master-voice.mp3" data-start="0" data-duration="60" data-track-index="2" data-volume="1"></audio>{scenes}{caps}<div class="footer"><span>Medical AI Teacher</span><span>{qid}</span></div></div><script>{js}</script></body></html>')
-              texts=[f'Read the question carefully. {q["question"]} The options are '+', '.join(f'option {chr(65+i)}: {o}' for i,o in enumerate(q['options']))+'. Dr. Anas proposes '+answer+'.',f'Correct. The answer is '+answer+'. Focus on the wording of the question and the tested concept.',f'Clinical reasoning. The key tested choice is '+answer+'. Use the stem and compare the options systematically.',f'Why are the other choices wrong? Compare each distractor with the stem. The best answer is '+answer+'.',f'Exam trap. Read whether the stem asks for an exception, the best answer, or a true statement. Here the answer is '+answer+'.',f'Take-home. Remember the correct choice: '+answer+'. This completes the explanation for '+qid+'.']
-              for i,t in enumerate(texts,1): open(f'{work}/{i:02d}.txt','w').write(t)
-          PY
+          targets=(10 8 12 12 10 8)
+          for i in 01 02 03 04 05 06; do
+            npx hyperframes tts "production/audio/${i}.txt" --voice "$TTS_VOICE" --output "production/audio/${i}.wav"
+            test -s "production/audio/${i}.wav"
+          done
           fit_audio() {
             local src="$1" dst="$2" target="$3" dur ratio
             dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$src")
             ratio=$(awk -v d="$dur" -v t="$target" 'BEGIN{r=d/t;if(r<0.5)r=0.5;if(r>2)r=2;printf "%.6f",r}')
             ffmpeg -y -v error -i "$src" -af "atempo=${ratio},apad" -t "$target" -ar 48000 -ac 2 -c:a pcm_s16le "$dst"
           }
-          for qdir in production/work/q*; do
-            echo "=== Producing $qdir ==="
-            mkdir -p "$qdir/audio"
-            for n in 01 02 03 04 05 06; do npx hyperframes tts "$qdir/$n.txt" --voice "$TTS_VOICE" --output "$qdir/audio/$n.wav"; test -s "$qdir/audio/$n.wav"; done
-            fit_audio "$qdir/audio/01.wav" "$qdir/audio/01-fit.wav" 10
-            fit_audio "$qdir/audio/02.wav" "$qdir/audio/02-fit.wav" 8
-            fit_audio "$qdir/audio/03.wav" "$qdir/audio/03-fit.wav" 12
-            fit_audio "$qdir/audio/04.wav" "$qdir/audio/04-fit.wav" 12
-            fit_audio "$qdir/audio/05.wav" "$qdir/audio/05-fit.wav" 10
-            fit_audio "$qdir/audio/06.wav" "$qdir/audio/06-fit.wav" 8
-            printf "file '%s'\n" "$PWD/$qdir/audio/01-fit.wav" "$PWD/$qdir/audio/02-fit.wav" "$PWD/$qdir/audio/03-fit.wav" "$PWD/$qdir/audio/04-fit.wav" "$PWD/$qdir/audio/05-fit.wav" "$PWD/$qdir/audio/06-fit.wav" > "$qdir/concat.txt"
-            ffmpeg -y -v error -f concat -safe 0 -i "$qdir/concat.txt" -t 60 -c:a pcm_s16le -ar 48000 -ac 2 "$qdir/master-voice.wav"
-            ffmpeg -y -v error -i "$qdir/master-voice.wav" -t 60 -c:a libmp3lame -b:a 160k "$qdir/master-voice.mp3"
-            test "$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$qdir/master-voice.mp3" | cut -d. -f1)" = "60"
-            npx hyperframes lint "$qdir" --verbose
-            npx hyperframes inspect "$qdir" --strict --json
-            num=$(basename "$qdir" | tr -cd '0-9')
-            npx hyperframes render "$qdir" --output "production/output/question-${num}.mp4" --quality standard --fps 30
-            ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,width,height,r_frame_rate -of json "production/output/question-${num}.mp4"
-            test "$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_type -of csv=p=0 "production/output/question-${num}.mp4")" = "audio"
-            test "$(ffprobe -v error -show_entries format=duration -of csv=p=0 "production/output/question-${num}.mp4" | cut -d. -f1)" = "60"
-          done
-      - name: Upload Batch 001
+          fit_audio production/audio/01.wav production/audio/01-fit.wav 10
+          fit_audio production/audio/02.wav production/audio/02-fit.wav 8
+          fit_audio production/audio/03.wav production/audio/03-fit.wav 12
+          fit_audio production/audio/04.wav production/audio/04-fit.wav 12
+          fit_audio production/audio/05.wav production/audio/05-fit.wav 10
+          fit_audio production/audio/06.wav production/audio/06-fit.wav 8
+          printf "file '%s'\n" "$PWD/production/audio/01-fit.wav" "$PWD/production/audio/02-fit.wav" "$PWD/production/audio/03-fit.wav" "$PWD/production/audio/04-fit.wav" "$PWD/production/audio/05-fit.wav" "$PWD/production/audio/06-fit.wav" > production/audio/concat.txt
+          ffmpeg -y -v error -f concat -safe 0 -i production/audio/concat.txt -t 60 -c:a pcm_s16le -ar 48000 -ac 2 production/render/master-voice-raw.wav
+          ffmpeg -y -v error -i production/render/master-voice-raw.wav -af "loudnorm=I=-16:TP=-1.5:LRA=3" -ar 44100 -ac 2 -c:a libmp3lame -b:a 160k -t 60 production/render/master-voice.mp3
+          test "$(ffprobe -v error -show_entries format=duration -of csv=p=0 production/render/master-voice.mp3 | cut -d. -f1)" = "60"
+          ffprobe -v error -show_entries format=duration -show_entries stream=codec_name,codec_type,sample_rate,channels -of json production/render/master-voice.mp3
+          cp production/render/master-voice.mp3 production/render/master-voice.mp3.bak
+      - name: Lint master composition
+        run: npx hyperframes lint production/render --verbose
+      - name: Visual inspect master composition
+        run: npx hyperframes inspect production/render --strict --json
+      - name: Render Q0001
+        run: npx hyperframes render production/render --output production/output/question-0001.mp4 --quality standard --fps 30
+      - name: Verify rendered Q0001
+        run: |
+          set -euo pipefail
+          ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,width,height,r_frame_rate,sample_rate,channels -of json production/output/question-0001.mp4
+          test "$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_type -of csv=p=0 production/output/question-0001.mp4)" = "audio"
+          test "$(ffprobe -v error -show_entries format=duration -of csv=p=0 production/output/question-0001.mp4 | cut -d. -f1)" = "60"
+          mkdir -p production/output/qa
+          ffmpeg -y -v error -ss 0 -i production/output/question-0001.mp4 -frames:v 1 production/output/qa/scene-01.png
+          ffmpeg -y -v error -ss 10 -i production/output/question-0001.mp4 -frames:v 1 production/output/qa/scene-02.png
+          ffmpeg -y -v error -ss 18 -i production/output/question-0001.mp4 -frames:v 1 production/output/qa/scene-03.png
+          ffmpeg -y -v error -ss 30 -i production/output/question-0001.mp4 -frames:v 1 production/output/qa/scene-04.png
+          ffmpeg -y -v error -ss 42 -i production/output/question-0001.mp4 -frames:v 1 production/output/qa/scene-05.png
+          ffmpeg -y -v error -ss 52 -i production/output/question-0001.mp4 -frames:v 1 production/output/qa/scene-06.png
+      - name: Upload Q0001
         uses: actions/upload-artifact@v4
         with:
-          name: medical-ai-teacher-batch-001
-          path: production/output/*.mp4
+          name: medical-ai-teacher-q0001-reference-style
+          path: |
+            production/output/question-0001.mp4
+            production/output/qa/*.png
+            production/render/master-voice.mp3
           if-no-files-found: error
           retention-days: 14
