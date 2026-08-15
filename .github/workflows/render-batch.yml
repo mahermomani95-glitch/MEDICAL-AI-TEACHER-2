@@ -1,0 +1,42 @@
+name: Medical AI Teacher — Dynamic Batch Render
+
+on:
+  workflow_dispatch:
+    inputs:
+      batch:
+        description: 'Batch JSON path'
+        required: true
+        default: 'production/batch-001.json'
+      output:
+        description: 'Output directory'
+        required: true
+        default: 'production/generated'
+
+jobs:
+  prepare-batch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build question compositions
+        run: node production/scripts/build-batch.mjs "${{ inputs.batch }}" "${{ inputs.output }}"
+      - name: Validate single-teacher rule
+        shell: bash
+        run: |
+          if grep -RniE 'Dr\. Anas|MAHER|student|dialogue|conversation' "${{ inputs.output }}"; then
+            echo 'Forbidden secondary-character text detected.'
+            exit 1
+          fi
+      - name: Validate required visual plan
+        shell: bash
+        run: |
+          test -n "$(find "${{ inputs.output }}" -name metadata.json -print -quit)"
+      - name: Upload batch compositions
+        uses: actions/upload-artifact@v4
+        with:
+          name: medical-ai-teacher-${{ github.run_number }}-compositions
+          path: ${{ inputs.output }}
