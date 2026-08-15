@@ -23,7 +23,8 @@ jobs:
           ffmpeg -y -v error -i production/master-dialogue/audio/teacher.mp3 -ar 48000 -ac 2 production/master-dialogue/audio/teacher.wav
           ffmpeg -y -v error -i production/master-dialogue/audio/teacher.wav -ar 48000 -ac 2 -c:a libmp3lame -b:a 160k production/master-dialogue/teacher-full.mp3
           cp production/master-dialogue/teacher-full.mp3 production/master-dialogue/teacher-60s.mp3
-          ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 production/master-dialogue/teacher-60s.mp3
+          D=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 production/master-dialogue/teacher-60s.mp3)
+          python3 -c "d=float('$D'); assert d>55, f'Audio too short: {d:.2f}s'; print(f'FULL AUDIO CHECK: {d:.2f}s')"
       - name: Extract V3 composition
         shell: bash
         run: |
