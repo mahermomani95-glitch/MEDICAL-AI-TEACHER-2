@@ -18,10 +18,12 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p production/master-dialogue/audio production/master-dialogue/output
-          curl -L --fail --retry 5 --retry-delay 3 "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/0e537842-e9ab-49e8-9d19-d843fb7005be.mp3" -o production/master-dialogue/audio/teacher.mp3
+          curl -L --fail --retry 5 --retry-delay 3 "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/d276fe1a-ff0e-48f7-9bd7-05c3f4909c7a.mp3" -o production/master-dialogue/audio/teacher.mp3
           test -s production/master-dialogue/audio/teacher.mp3
           ffmpeg -y -v error -i production/master-dialogue/audio/teacher.mp3 -ar 48000 -ac 2 production/master-dialogue/audio/teacher.wav
-          ffmpeg -y -v error -i production/master-dialogue/audio/teacher.wav -af 'apad' -t 60 -ar 48000 -ac 2 -c:a libmp3lame -b:a 160k production/master-dialogue/teacher-60s.mp3
+          ffmpeg -y -v error -i production/master-dialogue/audio/teacher.wav -ar 48000 -ac 2 -c:a libmp3lame -b:a 160k production/master-dialogue/teacher-full.mp3
+          cp production/master-dialogue/teacher-full.mp3 production/master-dialogue/teacher-60s.mp3
+          ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 production/master-dialogue/teacher-60s.mp3
       - name: Extract V3 composition
         shell: bash
         run: |
@@ -37,9 +39,17 @@ jobs:
           npx hyperframes render production/master-dialogue --output production/master-dialogue/output/question-0001-v3-ar.mp4 --quality standard --fps 30
           test -s production/master-dialogue/output/question-0001-v3-ar.mp4
           ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,width,height -of json production/master-dialogue/output/question-0001-v3-ar.mp4
+          python3 - <<'PY'
+          import subprocess, json
+          p='production/master-dialogue/output/question-0001-v3-ar.mp4'
+          j=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-show_entries','stream=codec_type,codec_name','-of','json',p]))
+          assert any(s.get('codec_type')=='audio' for s in j.get('streams',[])), 'No audio stream'
+          assert float(j['format']['duration']) > 59, 'Video shorter than 59s'
+          print('FINAL MEDIA CHECK: audio stream present; video duration >59s')
+          PY
       - name: Upload V3
         uses: actions/upload-artifact@v4
         with:
-          name: medical-ai-teacher-master-v3-q0001-ar
+          name: medical-ai-teacher-master-v3-q0001-ar-full-voice
           path: production/master-dialogue/output/question-0001-v3-ar.mp4
           retention-days: 14
