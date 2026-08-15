@@ -14,35 +14,42 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install FFmpeg
         run: sudo apt-get update -y && sudo apt-get install -y ffmpeg curl
-      - name: Build valid Arabic teacher audio
+      - name: Build Arabic teacher audio from playable chunks
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p production/master-dialogue/audio production/master-dialogue/output
-          URL='https://www.aidocmaker.com/g0/audio?name=c155e45c659f46639a4f36497ed03fc5'
-          ok=0
-          for i in $(seq 1 20); do
-            echo "Checking generated voice availability (attempt $i/20)..."
-            rm -f production/master-dialogue/audio/teacher-source.mp3
-            curl -L --fail --retry 2 --retry-delay 2 "$URL" -o production/master-dialogue/audio/teacher-source.mp3 || true
-            if test -s production/master-dialogue/audio/teacher-source.mp3 && ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of default=nw=1:nk=1 production/master-dialogue/audio/teacher-source.mp3 >/tmp/audio_codec 2>/dev/null; then
-              echo "VALID AUDIO: $(cat /tmp/audio_codec)"
-              ok=1
-              break
-            fi
-            sleep 10
+          urls=(
+            'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/c9473137-fe69-46ee-9cb8-3ed412047a09.mp3'
+            'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/0a14145b-841c-49f1-b2a8-af111018f573.mp3'
+            'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/874a779e-a19c-49a3-9a85-d6b1a9d3e04a.mp3'
+            'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/bd59b63d-cc18-4ea4-ad1e-491ad0359d98.mp3'
+          )
+          : > production/master-dialogue/audio/list.txt
+          i=1
+          for url in "${urls[@]}"; do
+            f="production/master-dialogue/audio/chunk-${i}.mp3"
+            echo "Downloading Arabic teacher chunk ${i}..."
+            curl -L --fail --retry 5 --retry-delay 2 "$url" -o "$f"
+            test -s "$f"
+            codec=$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of default=nw=1:nk=1 "$f")
+            test -n "$codec"
+            echo "file 'chunk-${i}.mp3'" >> production/master-dialogue/audio/list.txt
+            i=$((i+1))
           done
-          test "$ok" = 1
-          ffmpeg -y -v error -i production/master-dialogue/audio/teacher-source.mp3 -ar 48000 -ac 2 -af apad -t 60 -c:a libmp3lame -b:a 160k production/master-dialogue/teacher-60s.mp3
-          D=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 production/master-dialogue/teacher-60s.mp3)
-          python3 -c "d=float('$D'); assert d>59, f'Audio too short: {d:.2f}s'; print(f'FULL AUDIO CHECK: {d:.2f}s')"
+          cd production/master-dialogue/audio
+          ffmpeg -y -v error -f concat -safe 0 -i list.txt -c:a libmp3lame -b:a 160k teacher-combined.mp3
+          D=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 teacher-combined.mp3)
+          python3 -c "d=float('$D'); assert d>=55, f'Combined speech too short: {d:.2f}s'; print(f'COMBINED AUDIO CHECK: {d:.2f}s')"
+          ffmpeg -y -v error -i teacher-combined.mp3 -af apad -t 60 -ar 48000 -ac 2 -c:a libmp3lame -b:a 160k ../teacher-60s.mp3
+          D2=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 ../teacher-60s.mp3)
+          python3 -c "d=float('$D2'); assert d>59, f'Final audio too short: {d:.2f}s'; print(f'FINAL AUDIO TRACK: {d:.2f}s')"
       - name: Extract V3 composition
         shell: bash
         run: |
           set -euo pipefail
           awk '/cat > production\/master-v3\/index.html <<'"'"'HTML'"'"'/{flag=1;next}/^          HTML$/{flag=0}flag' .github/workflows/master-dialogue-prototype.yml | sed 's/^          //' > production/master-dialogue/index.html
           test -s production/master-dialogue/index.html
-          sed -i 's/teacher-60s\.mp3/teacher-60s.mp3/g' production/master-dialogue/index.html
       - name: Lint inspect render and verify
         shell: bash
         run: |
@@ -55,10 +62,12 @@ jobs:
           python3 - <<'PY'
           import subprocess, json
           p='production/master-dialogue/output/question-0001-v3-ar-fixed.mp4'
-          j=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-show_entries','stream=codec_type,codec_name,width,height','-of','json',p]))
-          assert any(s.get('codec_type')=='audio' for s in j.get('streams',[])), 'No audio stream'
+          j=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-show_entries','stream=codec_type,codec_name,width,height,duration','-of','json',p]))
+          streams=j.get('streams',[])
+          assert any(s.get('codec_type')=='audio' for s in streams), 'No audio stream'
           assert float(j['format']['duration']) > 59, 'Video shorter than 59s'
           print('FINAL MEDIA CHECK: audio stream present; video duration >59s')
+          print(json.dumps(j, ensure_ascii=False))
           PY
       - name: Upload V3 fixed
         uses: actions/upload-artifact@v4
