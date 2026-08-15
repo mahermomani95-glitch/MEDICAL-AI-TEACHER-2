@@ -18,7 +18,7 @@ const DEFAULT_DURATION = {
 
 const SHOT_STYLE = {
   QUESTION: "question-card",
-  ANSWER_PROPOSAL: "character-dialogue",
+  ANSWER_PROPOSAL: "teacher-dialogue",
   CLINICAL_REASONING: "clinical-explainer",
   DISTRACTORS: "option-comparison",
   EXAM_TRAP: "warning-card",
@@ -27,7 +27,7 @@ const SHOT_STYLE = {
 
 const VISUAL_ROLE = {
   QUESTION: "Show the full MCQ and highlight the key clinical clue without revealing the answer.",
-  ANSWER_PROPOSAL: "Show Dr. Anas proposing the source-indicated answer; keep the answer letter visually prominent.",
+  ANSWER_PROPOSAL: "Show the teacher proposing the source-indicated answer; keep the answer letter visually prominent.",
   CLINICAL_REASONING: "Animate the reasoning as a simple clinical flow from clue to diagnosis/answer.",
   DISTRACTORS: "Present every alternative option and mark the elimination logic one option at a time.",
   EXAM_TRAP: "Freeze the key trigger and show a clear exam-trap warning; avoid introducing unsupported facts.",
