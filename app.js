@@ -15,29 +15,28 @@ function renderQuestionList() {
   questions.forEach((item, index) => {
     const option = document.createElement("option");
     option.value = index;
-    option.textContent = `${index + 1}. ${item.id || item.question}`;
+    option.textContent = `${index + 1}. ${item.arabic}`;
     select.appendChild(option);
   });
   select.value = String(currentQuestionIndex);
 }
 
 function renderQuestion() {
-  $("#question").textContent = q.question;
-  $("#arabic").textContent = q.arabic;
+  $("#question").textContent = q.arabic;
+  $("#arabic").textContent = "شرح السؤال بالعربي أولاً، ثم ننتقل للمنطق والجواب.";
   const optionsEl = $("#options");
   optionsEl.innerHTML = "";
-  q.options.forEach((item) => {
+  q.options.forEach((item, index) => {
     const option = document.createElement("div");
     option.className = `option${item.letter === q.source_indicated_answer ? " correct" : ""}`;
+    option.dir = "rtl";
     const letter = document.createElement("span");
     letter.className = "letter";
-    letter.dir = "ltr";
     letter.textContent = `${item.letter}.`;
     const text = document.createElement("span");
     text.className = "option-text";
-    text.dir = "ltr";
-    text.textContent = item.text;
-    option.append(letter, text);
+    text.textContent = q.arabic_options[index];
+    option.append(text, letter);
     if (item.letter === q.source_indicated_answer) {
       const check = document.createElement("span");
       check.className = "option-check";
@@ -50,28 +49,15 @@ function renderQuestion() {
 
 function renderDialogue(dialogue) {
   const container = document.createElement("div");
-  container.className = "dialogue-list";
-  let currentBlock = null;
-  let currentSpeaker = null;
+  container.className = "dialogue-list teacher-only";
   dialogue.forEach((item) => {
-    if (item.name !== currentSpeaker) {
-      currentSpeaker = item.name;
-      currentBlock = document.createElement("div");
-      currentBlock.className = "dialogue-block";
-      const speaker = document.createElement("div");
-      speaker.className = "speaker-name";
-      speaker.dir = "ltr";
-      speaker.textContent = `${item.name}:`;
-      currentBlock.appendChild(speaker);
-      container.appendChild(currentBlock);
-    }
     item.parts.forEach((part) => {
       const line = document.createElement("div");
-      line.className = part.type === "ar" ? "arabic-line" : "english-line";
-      line.dir = part.type === "ar" ? "rtl" : "ltr";
-      line.lang = part.type === "ar" ? "ar" : "en";
+      line.className = "arabic-line";
+      line.dir = "rtl";
+      line.lang = "ar";
       line.textContent = part.text;
-      currentBlock.appendChild(line);
+      container.appendChild(line);
     });
   });
   return container;
@@ -84,8 +70,8 @@ function renderScene() {
   const dialogue = $("#dialogue");
   dialogue.innerHTML = "";
   dialogue.appendChild(renderDialogue(scene.dialogue));
-  $("#next").textContent = currentScene === scenes.length - 1 ? "Restart teaching →" : "Next teaching scene →";
-  if ($("#sceneProgress")) $("#sceneProgress").textContent = `Scene ${currentScene + 1} / ${scenes.length}`;
+  $("#next").textContent = currentScene === scenes.length - 1 ? "إعادة الشرح ↻" : "المشهد التالي ←";
+  if ($("#sceneProgress")) $("#sceneProgress").textContent = `المشهد ${currentScene + 1} / ${scenes.length}`;
 }
 
 function selectQuestion(index) {
