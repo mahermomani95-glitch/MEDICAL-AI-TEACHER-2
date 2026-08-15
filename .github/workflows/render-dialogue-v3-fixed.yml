@@ -19,8 +19,19 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p production/master-dialogue/audio production/master-dialogue/output
-          curl -L --fail --retry 5 --retry-delay 3 'https://www.aidocmaker.com/g0/audio?name=537c24e4a22c436b9b201d8f327a72ca' -o production/master-dialogue/audio/teacher-source.mp3
-          test -s production/master-dialogue/audio/teacher-source.mp3
+          URL='https://www.aidocmaker.com/g0/audio?name=8bdbbabfb8eb4b7fabcbe2d20c804722'
+          ok=0
+          for i in $(seq 1 20); do
+            echo "Checking generated voice availability (attempt $i/20)..."
+            curl -L --fail --retry 2 --retry-delay 2 "$URL" -o production/master-dialogue/audio/teacher-source.mp3 || true
+            if test -s production/master-dialogue/audio/teacher-source.mp3 && ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of default=nw=1:nk=1 production/master-dialogue/audio/teacher-source.mp3 >/tmp/audio_codec 2>/dev/null; then
+              echo "VALID AUDIO: $(cat /tmp/audio_codec)"
+              ok=1
+              break
+            fi
+            sleep 10
+          done
+          test "$ok" = 1
           ffmpeg -y -v error -i production/master-dialogue/audio/teacher-source.mp3 -ar 48000 -ac 2 -af apad -t 60 -c:a libmp3lame -b:a 160k production/master-dialogue/teacher-60s.mp3
           D=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 production/master-dialogue/teacher-60s.mp3)
           python3 -c "d=float('$D'); assert d>59, f'Audio too short: {d:.2f}s'; print(f'FULL AUDIO CHECK: {d:.2f}s')"
