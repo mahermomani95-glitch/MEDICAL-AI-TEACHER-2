@@ -34,7 +34,12 @@ jobs:
       - name: Install HyperFrames TTS runtime
         run: |
           set -euo pipefail
+          python -m venv .tts-venv
+          . .tts-venv/bin/activate
+          python -m pip install --disable-pip-version-check --no-input --upgrade pip
           python -m pip install --disable-pip-version-check --no-input kokoro-onnx soundfile
+          python -c "import kokoro_onnx, soundfile; print('TTS runtime OK')"
+          echo "HYPERFRAMES_PYTHON=$PWD/.tts-venv/bin/python" >> "$GITHUB_ENV"
       - name: Check TTS voices
         run: npx hyperframes tts --list
       - name: Generate production narration locally
