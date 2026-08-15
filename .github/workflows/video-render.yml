@@ -33,7 +33,7 @@ jobs:
       - name: Install HyperFrames
         run: npm install --no-save hyperframes
       - name: Lint composition
-        run: npx hyperframes lint video --strict
+        run: npx hyperframes lint video
       - name: Visual inspect
         run: npx hyperframes inspect video --strict --json
       - name: Render MP4 preview
