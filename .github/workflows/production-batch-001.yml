@@ -38,24 +38,12 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p production/audio production/render
-          cat > production/audio/01.txt <<'EOF'
-In obstructive jaundice, bleeding tendency is due to deficiency of the following clotting factors except? The options are factor two, factor seven, factor eight, factor nine and factor ten. Dr. Anas proposes factor eight.
-EOF
-          cat > production/audio/02.txt <<'EOF'
-Correct. Factor eight is the exception. The key is to recognize which clotting factors depend on vitamin K.
-EOF
-          cat > production/audio/03.txt <<'EOF'
-Obstructive jaundice reduces bile delivery to the intestine. This impairs absorption of fat-soluble vitamin K. As a result, vitamin K-dependent clotting factors, especially factors two, seven, nine and ten, decrease.
-EOF
-          cat > production/audio/04.txt <<'EOF'
-Why are the other choices wrong? Factors two, seven, nine and ten are vitamin K dependent, so they are reduced when vitamin K absorption is impaired. Factor eight is not vitamin K dependent, so it is the exception.
-EOF
-          cat > production/audio/05.txt <<'EOF'
-Exam trap: do not confuse factor eight with the vitamin K-dependent factors. The high-yield sequence is two, seven, nine and ten.
-EOF
-          cat > production/audio/06.txt <<'EOF'
-Take-home: obstructive jaundice means reduced vitamin K absorption and reduced factors two, seven, nine and ten. Factor eight is the exception.
-EOF
+          printf '%s\n' 'In obstructive jaundice, bleeding tendency is due to deficiency of the following clotting factors except? The options are factor two, factor seven, factor eight, factor nine and factor ten. Dr. Anas proposes factor eight.' > production/audio/01.txt
+          printf '%s\n' 'Correct. Factor eight is the exception. The key is to recognize which clotting factors depend on vitamin K.' > production/audio/02.txt
+          printf '%s\n' 'Obstructive jaundice reduces bile delivery to the intestine. This impairs absorption of fat-soluble vitamin K. As a result, vitamin K-dependent clotting factors, especially factors two, seven, nine and ten, decrease.' > production/audio/03.txt
+          printf '%s\n' 'Why are the other choices wrong? Factors two, seven, nine and ten are vitamin K dependent, so they are reduced when vitamin K absorption is impaired. Factor eight is not vitamin K dependent, so it is the exception.' > production/audio/04.txt
+          printf '%s\n' 'Exam trap: do not confuse factor eight with the vitamin K-dependent factors. The high-yield sequence is two, seven, nine and ten.' > production/audio/05.txt
+          printf '%s\n' 'Take-home: obstructive jaundice means reduced vitamin K absorption and reduced factors two, seven, nine and ten. Factor eight is the exception.' > production/audio/06.txt
           for n in 01 02 03 04 05 06; do
             npx hyperframes tts "production/audio/${n}.txt" --voice "$TTS_VOICE" --output "production/audio/${n}.wav"
             test -s "production/audio/${n}.wav"
