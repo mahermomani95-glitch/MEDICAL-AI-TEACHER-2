@@ -1,0 +1,19 @@
+{
+  "batch": "001",
+  "source": "THE MOMANI’S MCQ BANK / question-bank source files",
+  "count": 10,
+  "status": "queued",
+  "template": "medical-ai-master",
+  "questions": [
+    {"id":"surgery-1-0001","specialty":"Surgery","year":"2013","question":"In obstructive jaundice, bleeding tendency is due to deficiency of the following clotting factors except:","options":["2","7","8","9","10"],"correct_index":2,"correct_letter":"C"},
+    {"id":"surgery-1-0002","specialty":"Surgery","year":"2014","question":"All are risk factors for vasa previa except:","options":["Multiple pregnancy","High lying placenta","Bilobed placenta","Succenturiate placenta","IVF pregnancy"],"correct_index":1,"correct_letter":"B"},
+    {"id":"surgery-1-0003","specialty":"Surgery","year":"2016","question":"Bacteremia from which of the following organism is associated with colon cancer?","options":["Streptococcus bovis","C difficile","MRSA","H pylori","Streptococcus viridans"],"correct_index":0,"correct_letter":"A"},
+    {"id":"surgery-1-0004","specialty":"Surgery","year":"2017","question":"Regarding Cervical intraepithelial neoplasia (CIN) 3 all are true except:","options":["Patient should be referred to colposcopy","Endocervical curettage is useful for diagnosis","If the colposcopy shows invasive disease cone biopsy must be taken","If the entire SC cannot be seen or visualized cone biopsy must be taken","Cone biopsy can be diagnostic but not therapeutic"],"correct_index":4,"correct_letter":"E"},
+    {"id":"surgery-1-0005","specialty":"Surgery","year":"2018","question":"A 22 years old man suffers a severe pelvic fracture and has Hematuria. You get a retrograde cystourethrogram and see an extraperitoneal bladder rupture. The most appropriate therapy:","options":["Foley drainage for 7 day","Exploratory laparotomy","Cystectomy","Observation","Cystoscopy and repair"],"correct_index":0,"correct_letter":"A"},
+    {"id":"surgery-1-0006","specialty":"Surgery","year":"2019","question":"Using the Parkland formula, the fluid requirement in the first 24 h for a man of 70 kg with a full-thickness burn involving both upper limbs is:","options":["5040 mL","4200mL","3920mL","3360mL","3000mL"],"correct_index":0,"correct_letter":"A"},
+    {"id":"surgery-1-0007","specialty":"Surgery","year":"2020","question":"All of the following about COVID 19 are true except:","options":["PPE for all medical staff","Intubate and extubate outside theater","Work with minimal staff","Treat all patient as COVID-19","Relay on laparoscopic procedures rather than open"],"correct_index":1,"correct_letter":"B"},
+    {"id":"surgery-1-0008","specialty":"Surgery","year":"2021","question":"Complications after thyroid surgery include the following except:","options":["Bleeding or hematoma","Thyroid crisis (storm)","Wound infection rate around 5%","Injury to recurrent laryngeal or superior laryngeal nerves","Tracheal collapse for long-standing huge goiter"],"correct_index":2,"correct_letter":"C"},
+    {"id":"surgery-1-0009","specialty":"Surgery","year":"2013","question":"Lateral internal sphincterotomy is the treatment of choice for:","options":["Hemorrhoids","Anal fissure","Perianal abscess","Perianal hematoma","Intrasphincteric abscess"],"correct_index":1,"correct_letter":"B"},
+    {"id":"surgery-1-0010","specialty":"Surgery","year":"2014","question":"Absolute contraindication for OCP is:","options":["Gallbladder stones","Arterial hypertension (> 160/95 mm Hg)","Migraine without aura","Controlled DM or HTN","Age >35"],"correct_index":1,"correct_letter":"B"}
+  ]
+}
