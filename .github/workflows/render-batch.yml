@@ -2,7 +2,7 @@ name: Medical AI Teacher — Dynamic Batch Render
 
 on:
   push:
-    branches: ["agent/import-full-question-bank"]
+    branches: ["main", "agent/import-full-question-bank"]
     paths:
       - "production/batch-*.json"
       - "production/scripts/build-batch.mjs"
