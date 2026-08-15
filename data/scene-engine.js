@@ -53,7 +53,7 @@ export function buildScenes(question) {
     { id: "EXAM_TRAP", label: SCENE_DEFINITIONS[4].label, visual: "Warning-card visual that zooms into the trigger word and shows the common exam trap without adding unsupported facts.", dialogue: [
       SPEAKER("TEACHER", AR("انتبه إلى الفخ الامتحاني.")), SPEAKER("TEACHER", EN(`Trigger: ${trigger}`)), SPEAKER("TEACHER", AR("لا تنجذب لخيار يبدو صحيحاً جزئياً وتنسى المعلومة المفتاحية. ارجع دائماً للـclinical clue."))
     ]},
-    { id: "TAKE_HOME", label: SCENE_DEFINITIONS[5].label, visual: "Clean recap card with trigger, memory anchor, correct answer, and a concise medical diagram when appropriate.", dialogue: [
+    { id: "TAKE_HOME", label: SCENE_DEFINITIONS[5].label, visual: `Clean recap card with trigger, memory anchor, correct answer ${answer}, and a concise medical diagram when appropriate.`, dialogue: [
       SPEAKER("TEACHER", AR("الخلاصة التي نريد تثبيتها:")), SPEAKER("TEACHER", EN(memory)), SPEAKER("TEACHER", AR(`الإجابة النهائية: ${answer} — ${correctText}.`)), SPEAKER("TEACHER", AR("افهم الفكرة، اربطها بالـvisual، ثم ثبت الـtrigger في الذاكرة."))
     ]}
   ];
