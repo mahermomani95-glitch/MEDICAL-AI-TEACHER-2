@@ -2,9 +2,16 @@ name: Render educational video preview
 
 on:
   workflow_dispatch:
+    inputs:
+      quality:
+        description: Render quality
+        required: true
+        default: standard
+        type: choice
+        options: [draft, standard, high]
   push:
-    branches:
-      - agent/import-full-question-bank
+    branches: ["agent/import-full-question-bank"]
+    paths: ["video/**", ".github/workflows/video-render.yml"]
 
 permissions:
   contents: read
@@ -15,30 +22,26 @@ env:
 jobs:
   render-preview:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-
       - name: Install HyperFrames
         run: npm install --no-save hyperframes
-
       - name: Lint composition
-        run: npx hyperframes lint video
-
+        run: npx hyperframes lint video --strict
       - name: Visual inspect
-        run: npx hyperframes inspect video --strict
-
+        run: npx hyperframes inspect video --strict --json
       - name: Render MP4 preview
-        run: npx hyperframes render video --output medical-ai-teacher-preview.mp4 --quality standard --fps 30
-
+        run: npx hyperframes render video --output medical-ai-teacher-preview.mp4 --quality "${{ inputs.quality || 'standard' }}" --fps 30
       - name: Upload preview
         uses: actions/upload-artifact@v4
         with:
           name: medical-ai-teacher-preview
           path: medical-ai-teacher-preview.mp4
+          if-no-files-found: error
           retention-days: 7
