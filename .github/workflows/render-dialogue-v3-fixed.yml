@@ -19,10 +19,11 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p production/master-dialogue/audio production/master-dialogue/output
-          URL='https://www.aidocmaker.com/g0/audio?name=8bdbbabfb8eb4b7fabcbe2d20c804722'
+          URL='https://www.aidocmaker.com/g0/audio?name=c155e45c659f46639a4f36497ed03fc5'
           ok=0
           for i in $(seq 1 20); do
             echo "Checking generated voice availability (attempt $i/20)..."
+            rm -f production/master-dialogue/audio/teacher-source.mp3
             curl -L --fail --retry 2 --retry-delay 2 "$URL" -o production/master-dialogue/audio/teacher-source.mp3 || true
             if test -s production/master-dialogue/audio/teacher-source.mp3 && ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of default=nw=1:nk=1 production/master-dialogue/audio/teacher-source.mp3 >/tmp/audio_codec 2>/dev/null; then
               echo "VALID AUDIO: $(cat /tmp/audio_codec)"
