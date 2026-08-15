@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Medical AI Teacher — Master Video</title>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+    :root{--bg:#07111F;--panel:#0E2A36;--accent:#19C3B1;--accent2:#8BE9E0;--text:#F7FAFC}
+    *{box-sizing:border-box} html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Inter,"Noto Sans Arabic",Arial,sans-serif}
+    [data-composition-id="medical-ai-master"]{width:1920px;height:1080px;position:relative;overflow:hidden;background:radial-gradient(circle at 75% 20%,#123441 0,transparent 38%),var(--bg)}
+    .scene{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;width:100%;height:100%;padding:100px 150px;gap:34px;opacity:0}
+    .scene.active{opacity:1}.kicker{font-size:28px;letter-spacing:.12em;color:var(--accent);font-weight:700}.title{font-size:72px;line-height:1.12;max-width:1550px;font-weight:800}.subtitle{font-size:38px;line-height:1.45;max-width:1500px}.card{background:rgba(14,42,54,.9);border:2px solid rgba(139,233,224,.18);border-radius:30px;padding:42px 52px;box-shadow:0 24px 70px rgba(0,0,0,.25)}.options{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:12px}.option{font-size:30px;padding:24px;border-radius:18px;background:rgba(255,255,255,.04)}.correct{border-color:var(--accent);box-shadow:0 0 0 2px rgba(25,195,177,.15) inset}.speaker{font-size:24px;color:var(--accent2);font-weight:800;margin-bottom:10px}.line{font-size:34px;line-height:1.5;margin:8px 0}.ar{direction:rtl;text-align:right}.en{direction:ltr;text-align:left}.memory{font-size:54px;color:var(--accent2);font-weight:800;letter-spacing:.03em}.footer{position:absolute;bottom:44px;left:150px;right:150px;display:flex;justify-content:space-between;color:rgba(247,250,252,.6);font-size:20px}
+    .node{width:220px;height:220px;border-radius:50%;border:4px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;background:rgba(7,17,31,.8)}.sequence{display:flex;align-items:center;gap:28px}.arrow{font-size:54px;color:var(--accent)}
+  </style>
+</head>
+<body>
+<div data-composition-id="medical-ai-master" data-width="1920" data-height="1080">
+  <section class="scene" data-start="0" data-duration="10" data-track-index="1">
+    <div class="kicker">MEDICAL AI TEACHER · 01</div>
+    <div class="title ar">ما هو الترتيب الصحيح لتعافي حركة الجهاز الهضمي بعد جراحة البطن؟</div>
+    <div class="card options">
+      <div class="option">A — Stomach → Colon → Small bowel</div><div class="option">B — Colon → Small bowel → Stomach</div>
+      <div class="option correct">C — Stomach → Small bowel → Colon</div><div class="option">D — Small bowel → Stomach → Colon</div>
+      <div class="option">E — Small bowel → Colon → Stomach</div>
+    </div>
+  </section>
+  <section class="scene" data-start="10" data-duration="8" data-track-index="1">
+    <div class="kicker">ANSWER PROPOSAL · 02</div>
+    <div class="title">C — Stomach → Small bowel → Colon</div>
+    <div class="card"><div class="speaker">MAHER</div><div class="line ar">أختار C لأن الترتيب يتبع المسار الفسيولوجي الطبيعي.</div></div>
+  </section>
+  <section class="scene" data-start="18" data-duration="12" data-track-index="1">
+    <div class="kicker">CLINICAL REASONING · 03</div>
+    <div class="title ar">الفكرة الأساسية: اتبع التسلسل الفسيولوجي الطبيعي.</div>
+    <div class="sequence"><div class="node">Stomach</div><div class="arrow">→</div><div class="node">Small bowel</div><div class="arrow">→</div><div class="node">Colon</div></div>
+    <div class="card"><div class="speaker">DR. ANAS</div><div class="line ar">الشرح الموجود في المصدر يصف المسار الطبيعي: المعدة ثم الأمعاء الدقيقة ثم القولون.</div></div>
+  </section>
+  <section class="scene" data-start="30" data-duration="12" data-track-index="1">
+    <div class="kicker">DISTRACTORS · 04</div>
+    <div class="title ar">لماذا الخيارات الأخرى خاطئة؟</div>
+    <div class="card"><div class="line ar">الخيارات A وB وD وE تغيّر أو تعكس التسلسل الطبيعي.</div><div class="line en">Each distractor reverses or alters the normal sequence.</div></div>
+  </section>
+  <section class="scene" data-start="42" data-duration="10" data-track-index="1">
+    <div class="kicker">EXAM TRAP · 05</div>
+    <div class="title ar">لا تحفظ حرف C فقط.</div>
+    <div class="card"><div class="line ar">Trigger: <b>normal physiological sequence</b></div><div class="line ar">إذا تغيّر ترتيب الأعضاء، ارجع للمسار الطبيعي بدل التخمين.</div></div>
+  </section>
+  <section class="scene" data-start="52" data-duration="8" data-track-index="1">
+    <div class="kicker">TAKE HOME · 06</div>
+    <div class="title ar">احفظ الفكرة، وليس حرف الإجابة.</div>
+    <div class="memory">Stomach → Small bowel → Colon</div>
+    <div class="subtitle ar">Memory Anchor</div>
+  </section>
+  <div class="footer"><span>Medical AI Teacher</span><span>Question → Reasoning → Memory</span></div>
+</div>
+<script>
+  window.__timelines = window.__timelines || {};
+  const root = document.querySelector('[data-composition-id="medical-ai-master"]');
+  const scenes = [...root.querySelectorAll('.scene')];
+  const tl = gsap.timeline({paused:true});
+  scenes.forEach((scene, i) => {
+    const start = Number(scene.dataset.start);
+    const dur = Number(scene.dataset.duration);
+    tl.to(scene,{opacity:1,duration:.55,ease:'power2.out'},start);
+    tl.to(scene,{opacity:0,duration:.45,ease:'power2.in'},start+dur-.45);
+    tl.from(scene.querySelector('.title'),{y:35,opacity:0,duration:.5,ease:'power3.out'},start+.05);
+    tl.from(scene.querySelectorAll('.card,.sequence,.memory'),{y:25,opacity:0,duration:.45,stagger:.08,ease:'power2.out'},start+.2);
+  });
+  window.__timelines['medical-ai-master']=tl;
+</script>
+</body>
+</html>
