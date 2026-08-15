@@ -72,11 +72,12 @@ jobs:
           fit_audio production/audio/05.wav production/audio/05-fit.wav 10
           fit_audio production/audio/06.wav production/audio/06-fit.wav 8
           printf "file '%s'\n" "$PWD/production/audio/01-fit.wav" "$PWD/production/audio/02-fit.wav" "$PWD/production/audio/03-fit.wav" "$PWD/production/audio/04-fit.wav" "$PWD/production/audio/05-fit.wav" "$PWD/production/audio/06-fit.wav" > production/audio/concat.txt
-          ffmpeg -y -v error -f concat -safe 0 -i production/audio/concat.txt -c:a pcm_s16le production/render/master-voice.wav
-          ffmpeg -y -v error -i production/render/master-voice.wav -c:a libmp3lame -b:a 160k production/render/master-voice.mp3
+          ffmpeg -y -v error -f concat -safe 0 -i production/audio/concat.txt -t 60 -c:a pcm_s16le -ar 48000 -ac 2 production/render/master-voice.wav
+          ffmpeg -y -v error -i production/render/master-voice.wav -t 60 -c:a libmp3lame -b:a 160k production/render/master-voice.mp3
           ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name -of json production/render/master-voice.mp3
+          test "$(ffprobe -v error -show_entries format=duration -of csv=p=0 production/render/master-voice.mp3 | cut -d. -f1)" = "60"
       - name: Lint production composition
-        run: npx hyperframes lint production/render
+        run: npx hyperframes lint production/render --verbose
       - name: Visual inspect production composition
         run: npx hyperframes inspect production/render --strict --json
       - name: Render question 0001
