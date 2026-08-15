@@ -6,7 +6,7 @@ on:
     branches: ["main"]
     paths:
       - "production/batch-*.json"
-      - "production/scripts/build-batch.mjs"
+      - "production/scripts/**"
       - ".github/workflows/render-batch-main.yml"
   workflow_dispatch:
     inputs:
@@ -34,6 +34,13 @@ jobs:
           node-version: 22
       - name: Install HyperFrames
         run: npm install --no-save hyperframes
+      - name: Validate source production scripts
+        run: |
+          set -euo pipefail
+          if grep -RniE 'Dr\. Anas|MAHER|student|conversation' production/scripts --include='*.json' --include='*.js' --include='*.mjs'; then
+            echo "Secondary character or non-teacher dialogue detected in production source"
+            exit 1
+          fi
       - name: Build question compositions
         env:
           BATCH: ${{ inputs.batch || 'production/batch-001.json' }}
