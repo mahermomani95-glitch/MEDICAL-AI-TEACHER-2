@@ -31,6 +31,10 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: Install HyperFrames
         run: npm install --no-save hyperframes
+      - name: Install HyperFrames TTS runtime
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check --no-input kokoro-onnx soundfile
       - name: Check TTS voices
         run: npx hyperframes tts --list
       - name: Generate production narration locally
