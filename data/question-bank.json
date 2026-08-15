@@ -3,7 +3,7 @@
     "id": "surgery-2013-06-001",
     "source": "All medical questions(4).pdf",
     "question": "The true arrangement for gastrointestinal tract recovery after any abdominal surgery?",
-    "arabic": "ما هو الترتيب الحقيقي لتعافي الجهاز الهضمي بعد أي عملية جراحية في البطن؟",
+    "arabic": "ما هو الترتيب الصحيح لعودة وظيفة الجهاز الهضمي بعد أي عملية جراحية في البطن؟",
     "options": [
       { "letter": "A", "text": "Stomach then colon then small bowel" },
       { "letter": "B", "text": "Colon then small bowel then stomach" },
@@ -11,12 +11,20 @@
       { "letter": "D", "text": "Small bowel then stomach then colon" },
       { "letter": "E", "text": "Small bowel then colon then stomach" }
     ],
+    "arabic_options": [
+      "المعدة ثم القولون ثم الأمعاء الدقيقة",
+      "القولون ثم الأمعاء الدقيقة ثم المعدة",
+      "المعدة ثم الأمعاء الدقيقة ثم القولون",
+      "الأمعاء الدقيقة ثم المعدة ثم القولون",
+      "الأمعاء الدقيقة ثم القولون ثم المعدة"
+    ],
     "source_indicated_answer": "C",
     "teaching": {
-      "trigger": ["normal physiological sequence"],
-      "reasoning": "The source explanation under option C describes the normal physiological pathway as stomach → small bowel → colon.",
-      "distractors": "Each distractor reverses or alters the normal sequence.",
-      "memory_anchor": "Stomach → Small bowel → Colon"
+      "trigger": ["عودة الحركة الطبيعية للجهاز الهضمي بعد الجراحة"],
+      "reasoning": "بعد جراحة البطن تعود حركة الجهاز الهضمي عادةً بتسلسل فسيولوجي يبدأ بالمعدة، ثم الأمعاء الدقيقة، ثم القولون. لذلك يكون الخيار الذي يذكر هذا التسلسل هو الصحيح.",
+      "distractors": "الخيارات الأخرى تغيّر ترتيب الأعضاء، ولذلك لا تمثل التسلسل الفسيولوجي الصحيح.",
+      "memory_anchor": "المعدة ← الأمعاء الدقيقة ← القولون",
+      "visual_hint": "تسلسل عودة الحركة: المعدة ← الأمعاء الدقيقة ← القولون"
     }
   }
 ]
