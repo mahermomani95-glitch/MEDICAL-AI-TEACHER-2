@@ -28,7 +28,6 @@ jobs:
           set -euo pipefail
           awk '/cat > production\/master-v3\/index.html <<'"'"'HTML'"'"'/{flag=1;next}/^          HTML$/{flag=0}flag' .github/workflows/master-dialogue-prototype.yml | sed 's/^          //' > production/master-dialogue/index.html
           test -s production/master-dialogue/index.html
-          cp production/master-dialogue/teacher-60s.mp3 production/master-dialogue/teacher-60s.mp3
       - name: Lint inspect and render V3
         run: |
           set -euo pipefail
