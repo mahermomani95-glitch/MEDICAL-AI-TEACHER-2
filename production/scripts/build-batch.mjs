@@ -52,18 +52,18 @@ for (const q of data.questions) {
 </head>
 <body>
 <div id="medical-ai-teacher-${esc(q.id)}" data-composition-id="medical-ai-teacher-${esc(q.id)}" data-start="0" data-duration="60" data-fps="30" data-width="1920" data-height="1080">
-<section id="scene-01" class="scene" data-start="0" data-duration="10"><div class="k">MEDICAL AI TEACHER · ${esc(q.specialty)} ${esc(q.year)}</div><div class="t ar">${esc(q.question)}</div><div class="card">${optionsHtml}</div><div class="visual">Suggested visual: ${esc(visual)}</div></section>
-<section id="scene-02" class="scene" data-start="10" data-duration="8"><div class="k">ANSWER · 02</div><div class="t">${esc(correct)}</div><div class="card ar">الإجابة الصحيحة: ${esc(q.options[q.correct_index])}</div></section>
-<section id="scene-03" class="scene" data-start="18" data-duration="12"><div class="k">CLINICAL REASONING · 03</div><div class="t ar">شرح الفكرة الأساسية</div><div class="card ar">يشرح المعلم الفكرة الأساسية للسؤال، مع رسم أو مخطط طبي مرتبط بالمعلومة بدل استخدام صورة عشوائية.</div></section>
-<section id="scene-04" class="scene" data-start="30" data-duration="12"><div class="k">DISTRACTORS · 04</div><div class="t ar">تحليل الخيارات</div><div class="card ar">يشرح المعلم لماذا الإجابة المختارة صحيحة، ولماذا الخيارات الأخرى لا تنطبق وفق محتوى السؤال والمصدر.</div></section>
-<section id="scene-05" class="scene" data-start="42" data-duration="10"><div class="k">EXAM TRAP · 05</div><div class="t ar">نقطة الامتحان</div><div class="card ar">نستخرج Trigger Word أو قاعدة عالية العائد من السؤال.</div></section>
-<section id="scene-06" class="scene" data-start="52" data-duration="8"><div class="k">TAKE HOME · 06</div><div class="t ar">الخلاصة</div><div class="card ar">${esc(correct)} — احفظ القاعدة الأساسية واربطها بالمخطط الطبي الظاهر.</div></section>
-<div class="caption" data-start="0" data-duration="10"><span>${esc(q.question)}</span></div>
-<div class="caption" data-start="10" data-duration="8"><span>الإجابة الصحيحة: ${esc(q.options[q.correct_index])}</span></div>
-<div class="caption" data-start="18" data-duration="12"><span>الفكرة الأساسية للسؤال والقاعدة الطبية المرتبطة بها.</span></div>
-<div class="caption" data-start="30" data-duration="12"><span>تحليل الخيارات: لماذا الصحيح صحيح ولماذا المشتتات لا تنطبق.</span></div>
-<div class="caption" data-start="42" data-duration="10"><span>Exam Trap: انتبه إلى Trigger Word أو القاعدة عالية العائد.</span></div>
-<div class="caption" data-start="52" data-duration="8"><span>الخلاصة: ${esc(correct)}</span></div>
+<section id="scene-01" class="scene clip" data-start="0" data-duration="10"><div class="k">MEDICAL AI TEACHER · ${esc(q.specialty)} ${esc(q.year)}</div><div class="t ar">${esc(q.question)}</div><div class="card">${optionsHtml}</div><div class="visual">Suggested visual: ${esc(visual)}</div></section>
+<section id="scene-02" class="scene clip" data-start="10" data-duration="8"><div class="k">ANSWER · 02</div><div class="t">${esc(correct)}</div><div class="card ar">الإجابة الصحيحة: ${esc(q.options[q.correct_index])}</div></section>
+<section id="scene-03" class="scene clip" data-start="18" data-duration="12"><div class="k">CLINICAL REASONING · 03</div><div class="t ar">شرح الفكرة الأساسية</div><div class="card ar">يشرح المعلم الفكرة الأساسية للسؤال، مع رسم أو مخطط طبي مرتبط بالمعلومة بدل استخدام صورة عشوائية.</div></section>
+<section id="scene-04" class="scene clip" data-start="30" data-duration="12"><div class="k">DISTRACTORS · 04</div><div class="t ar">تحليل الخيارات</div><div class="card ar">يشرح المعلم لماذا الإجابة المختارة صحيحة، ولماذا الخيارات الأخرى لا تنطبق وفق محتوى السؤال والمصدر.</div></section>
+<section id="scene-05" class="scene clip" data-start="42" data-duration="10"><div class="k">EXAM TRAP · 05</div><div class="t ar">نقطة الامتحان</div><div class="card ar">نستخرج Trigger Word أو قاعدة عالية العائد من السؤال.</div></section>
+<section id="scene-06" class="scene clip" data-start="52" data-duration="8"><div class="k">TAKE HOME · 06</div><div class="t ar">الخلاصة</div><div class="card ar">${esc(correct)} — احفظ القاعدة الأساسية واربطها بالمخطط الطبي الظاهر.</div></section>
+<div class="caption clip" data-start="0" data-duration="10"><span>${esc(q.question)}</span></div>
+<div class="caption clip" data-start="10" data-duration="8"><span>الإجابة الصحيحة: ${esc(q.options[q.correct_index])}</span></div>
+<div class="caption clip" data-start="18" data-duration="12"><span>الفكرة الأساسية للسؤال والقاعدة الطبية المرتبطة بها.</span></div>
+<div class="caption clip" data-start="30" data-duration="12"><span>تحليل الخيارات: لماذا الصحيح صحيح ولماذا المشتتات لا تنطبق.</span></div>
+<div class="caption clip" data-start="42" data-duration="10"><span>Exam Trap: انتبه إلى Trigger Word أو القاعدة عالية العائد.</span></div>
+<div class="caption clip" data-start="52" data-duration="8"><span>الخلاصة: ${esc(correct)}</span></div>
 <div class="footer"><span>Medical AI Teacher</span><span>${esc(q.id)}</span></div>
 </div>
 <script>
