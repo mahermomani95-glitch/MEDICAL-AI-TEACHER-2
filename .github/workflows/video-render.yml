@@ -72,7 +72,7 @@ jobs:
           fit_audio video/audio/06.mp3 video/audio/06.wav 8
           printf "file '%s'\n" "$PWD/video/audio/01.wav" "$PWD/video/audio/02.wav" "$PWD/video/audio/03.wav" "$PWD/video/audio/04.wav" "$PWD/video/audio/05.wav" "$PWD/video/audio/06.wav" > video/audio/concat.txt
           ffmpeg -y -v error -f concat -safe 0 -i video/audio/concat.txt -c:a pcm_s16le video/master-voice.wav
-          ffmpeg -y -v error -i video/master-voice.wav -c:a aac -b:a 160k video/master-voice.mp3
+          ffmpeg -y -v error -i video/master-voice.wav -c:a libmp3lame -b:a 160k video/master-voice.mp3
           ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name -of json video/master-voice.mp3
       - name: Setup Node.js
         uses: actions/setup-node@v4
