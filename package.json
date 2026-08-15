@@ -12,7 +12,8 @@
     "test:video-engine": "node data/video-engine.test.mjs",
     "test:video-renderer": "node data/video-renderer.test.mjs",
     "test:render-html": "node data/render-html.test.mjs",
-    "test": "npm run test:scene-engine && npm run test:video-script && npm run test:video-engine && npm run test:video-renderer && npm run test:render-html",
+    "test:voice-config": "node data/voice-config.test.mjs",
+    "test": "npm run test:scene-engine && npm run test:video-script && npm run test:video-engine && npm run test:video-renderer && npm run test:render-html && npm run test:voice-config",
     "preview": "vite preview"
   },
   "devDependencies": {
