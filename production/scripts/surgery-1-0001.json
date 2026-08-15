@@ -1,0 +1,18 @@
+{
+  "id": "surgery-1-0001",
+  "source": "THE MOMANI’S MCQ BANK",
+  "specialty": "Surgery",
+  "year": "2013",
+  "question": "In obstructive jaundice, bleeding tendency is due to deficiency of the following clotting factors except:",
+  "options": ["2", "7", "8", "9", "10"],
+  "correct_answer": "C — Factor VIII",
+  "source_basis": "The source bank marks option C as the correct answer.",
+  "scenes": [
+    {"id":"QUESTION","duration":10,"narration":"In obstructive jaundice, bleeding tendency is due to deficiency of the following clotting factors except? The options are factor II, factor VII, factor VIII, factor IX and factor X. Dr. Anas proposes factor VIII.","caption":"في اليرقان الانسدادي، نقص أي عامل تخثر يسبب الميل للنزيف باستثناء؟ الإجابة المقترحة: العامل VIII."},
+    {"id":"ANSWER_PROPOSAL","duration":8,"narration":"Teacher: Correct — factor VIII is the exception. The key is to recognize which clotting factors depend on vitamin K.","caption":"الإجابة الصحيحة: Factor VIII. المفتاح هو معرفة عوامل التخثر المعتمدة على فيتامين K."},
+    {"id":"CLINICAL_REASONING","duration":12,"narration":"Obstructive jaundice reduces bile delivery to the intestine. This impairs absorption of fat-soluble vitamin K. As a result, vitamin K-dependent clotting factors, especially factors II, VII, IX and X, decrease.","caption":"اليرقان الانسدادي يقلل امتصاص فيتامين K، لذلك تنخفض العوامل II وVII وIX وX."},
+    {"id":"DISTRACTORS","duration":12,"narration":"Why are the other choices wrong? Factors II, VII, IX and X are vitamin K dependent, so they are reduced when vitamin K absorption is impaired. Factor VIII is not vitamin K dependent, so it is the exception.","caption":"العوامل II وVII وIX وX تعتمد على فيتامين K. أما Factor VIII فلا يعتمد عليه، لذلك هو الاستثناء."},
+    {"id":"EXAM_TRAP","duration":10,"narration":"Exam trap: do not confuse factor VIII with the vitamin K-dependent factors. The high-yield sequence is II, VII, IX and X.","caption":"Exam Trap: لا تخلط Factor VIII مع العوامل المعتمدة على فيتامين K: II, VII, IX, X."},
+    {"id":"TAKE_HOME","duration":8,"narration":"Take-home: obstructive jaundice means reduced vitamin K absorption and reduced factors II, VII, IX and X. Factor VIII is the exception.","caption":"الخلاصة: اليرقان الانسدادي → نقص امتصاص Vitamin K → نقص II, VII, IX, X. Factor VIII هو الاستثناء."}
+  ]
+}
