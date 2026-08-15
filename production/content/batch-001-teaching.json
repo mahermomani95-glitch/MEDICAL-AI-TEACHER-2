@@ -1,0 +1,82 @@
+{
+  "surgery-1-0001": {
+    "answer": "Factor VIII",
+    "reasoning": "في اليرقان الانسدادي يقل وصول الصفراء إلى الأمعاء، فيقل امتصاص Vitamin K. لذلك تنخفض عوامل التخثر المعتمدة على Vitamin K: II وVII وIX وX. أما Factor VIII فلا يعتمد على Vitamin K، لذلك هو الاستثناء.",
+    "distractors": "II وVII وIX وX هي عوامل Vitamin K-dependent، لذلك تمثل الخيارات الخاطئة في سؤال الاستثناء. Factor VIII هو الخيار الصحيح لأنه غير معتمد على Vitamin K.",
+    "trap": "Trigger Word: except. احفظ المجموعة II, VII, IX, X كعوامل Vitamin K-dependent.",
+    "take_home": "Obstructive jaundice → ↓ Vitamin K absorption → ↓ II, VII, IX, X. Factor VIII = exception.",
+    "visual": "مخطط: انسداد القنوات الصفراوية → ↓ امتصاص Vitamin K → II/VII/IX/X"
+  },
+  "surgery-1-0002": {
+    "answer": "High lying placenta",
+    "reasoning": "Vasa previa تعني مرور الأوعية الجنينية غير المحمية قرب أو فوق الفوهة الداخلية لعنق الرحم. عوامل الخطر تشمل الحمل المتعدد، bilobed أو succenturiate placenta، والحمل بعد IVF. المشيمة المرتفعة ليست عامل خطر بحد ذاتها.",
+    "distractors": "Multiple pregnancy وbilobed placenta وsuccenturiate placenta قد ترتبط بمسار غير طبيعي للأوعية، وIVF pregnancy معروف كعامل خطر. High lying placenta لا يفسر وجود أوعية جنينية مكشوفة قرب عنق الرحم.",
+    "trap": "Trigger Word: except. اربط vasa previa بالمشيمة ذات الفصوص الإضافية، الحمل المتعدد وIVF.",
+    "take_home": "Vasa previa = fetal vessels exposed near the internal os; فكّر في succenturiate/bilobed placenta وIVF.",
+    "visual": "رسم تشريحي للرحم يوضح fetal vessels فوق internal os مع bilobed/succenturiate placenta"
+  },
+  "surgery-1-0003": {
+    "answer": "Streptococcus bovis",
+    "reasoning": "Streptococcus gallolyticus، المعروف تاريخيًا باسم Streptococcus bovis، يرتبط بوجود colorectal neoplasia، ولذلك اكتشاف bacteremia أو endocarditis به يستدعي تقييم القولون.",
+    "distractors": "C. difficile يرتبط غالبًا بالتهاب القولون بعد المضادات، MRSA بعدوى staphylococcal، H. pylori بالمعدة، وStreptococcus viridans بالـoral flora وendocarditis؛ العلاقة الكلاسيكية مع colon cancer هي Streptococcus bovis/gallolyticus.",
+    "trap": "Trigger Word: bacteremia + colon cancer. احفظ Streptococcus bovis/gallolyticus → colorectal neoplasia.",
+    "take_home": "S. bovis/gallolyticus bacteremia = فكّر في colorectal neoplasia وقيّم القولون.",
+    "visual": "رسم colon مع سهم من Streptococcus bovis/gallolyticus إلى colorectal neoplasia"
+  },
+  "surgery-1-0004": {
+    "answer": "Cone biopsy can be diagnostic but not therapeutic",
+    "reasoning": "في CIN 3، colposcopy والتقييم النسيجي مهمان، وإذا لم يمكن رؤية كامل transformation zone أو وُجد شك بمرض غازٍ فقد يلزم excisional procedure مثل cone biopsy. الـcone biopsy قد يكون تشخيصيًا وعلاجيًا في حالات مختارة، لذلك العبارة التي تقول إنه diagnostic but not therapeutic هي الاستثناء.",
+    "distractors": "Colposcopy والإجراءات الاستئصالية تُستخدم لتقييم CIN 3. عدم رؤية كامل SC/TZ قد يدفع إلى excision. Cone biopsy ليس مجرد اختبار تشخيصي؛ يمكن أن يعالج الآفة إذا أزيلت بالكامل وبشروط مناسبة.",
+    "trap": "Trigger Word: all true except. لا تحفظ cone biopsy كإجراء تشخيصي فقط؛ يمكن أن يكون diagnostic and therapeutic.",
+    "take_home": "CIN 3 يحتاج تقييمًا دقيقًا، وcone biopsy قد يكون diagnostic + therapeutic في الحالة المناسبة.",
+    "visual": "رسم cervix وtransformation zone مع colposcopy ثم cone excision"
+  },
+  "surgery-1-0005": {
+    "answer": "Foley drainage for 7 day",
+    "reasoning": "Extraperitoneal bladder rupture بعد pelvic fracture غالبًا يعالج بقسطرة Foley لتصريف المثانة والسماح بالالتئام، مع متابعة الحالة. الإصلاح الجراحي يُفكّر فيه عند وجود إصابات أو ظروف تستدعيه.",
+    "distractors": "Exploratory laparotomy وcystectomy غير مطلوبين كعلاج روتيني لهذه الإصابة. Observation وحدها لا توفر drainage للمثانة. Cystoscopy and repair ليست الخيار المعتاد للـuncomplicated extraperitoneal rupture.",
+    "trap": "Trigger Word: extraperitoneal bladder rupture + pelvic fracture. فكّر أولًا في catheter drainage إذا كانت الإصابة غير معقدة.",
+    "take_home": "Uncomplicated extraperitoneal bladder rupture → Foley drainage مع المتابعة.",
+    "visual": "رسم pelvis يوضح extraperitoneal bladder rupture مع Foley catheter"
+  },
+  "surgery-1-0006": {
+    "answer": "5040 mL",
+    "reasoning": "Parkland formula = 4 mL × body weight kg × %TBSA. الحرق في الطرفين العلويين يعادل تقريبًا 18% TBSA باستخدام قاعدة التسعات. لرجل 70 kg: 4 × 70 × 18 = 5040 mL خلال أول 24 ساعة.",
+    "distractors": "الخطأ الشائع هو استخدام 9% بدل 18% للطرفين أو نسيان أن Parkland تعطي حجم السوائل لأول 24 ساعة. نصف الكمية يعطى خلال أول 8 ساعات من وقت الحرق، والباقي خلال 16 ساعة التالية.",
+    "trap": "Trigger Word: both upper limbs. 18% TBSA، ثم 4 × kg × %TBSA.",
+    "take_home": "Parkland = 4 × kg × %TBSA. 70 kg × 18% → 5040 mL/24 h.",
+    "visual": "قاعدة التسعات مع تظليل الطرفين العلويين + معادلة Parkland"
+  },
+  "surgery-1-0007": {
+    "answer": "Intubate and extubate outside theater",
+    "reasoning": "هذا السؤال يعكس مبادئ مكافحة العدوى والتخطيط الجراحي في سياق جائحة COVID-19. Intubation وextubation إجراءات عالية توليد الرذاذ، لذلك لا تُنقل إلى بيئة خارجية غير مجهزة؛ يلزم مكان مناسب وPPE وتقليل عدد العاملين.",
+    "distractors": "PPE وتقليل عدد العاملين من مبادئ الحماية. Treating patients as potentially infectious كان جزءًا من سياسات تلك الفترة. اختيار laparoscopic أو open يعتمد على الحالة والتجهيز، وليس قاعدة مطلقة.",
+    "trap": "Trigger Word: except. انتبه لعبارة intubate/extubate outside theater؛ الإجراء يحتاج بيئة آمنة ومجهزة.",
+    "take_home": "في سياق السؤال: airway procedures = aerosol risk → بيئة مناسبة + PPE + أقل عدد ممكن من الطاقم.",
+    "visual": "رسم غرفة عمليات مع PPE وairway team محدود العدد"
+  },
+  "surgery-1-0008": {
+    "answer": "Wound infection rate around 5%",
+    "reasoning": "مضاعفات thyroid surgery تشمل bleeding/hematoma، recurrent أو superior laryngeal nerve injury، hypocalcemia، وthyroid storm في سياقات معينة، كما قد يحدث tracheomalacia بعد إزالة goiter ضخم طويل الأمد. أما اعتبار wound infection rate حوالي 5% كقاعدة ثابتة فهو العبارة غير المناسبة في هذا السؤال.",
+    "distractors": "Hematoma قد يهدد airway، nerve injury قد يسبب voice changes، thyroid storm خطر مهم في المريض المصاب بفرط الدرقية غير المسيطر عليه، وtracheomalacia قد تظهر بعد long-standing huge goiter.",
+    "trap": "Trigger Word: complications ... except. ميّز المضاعفات النوعية المعروفة لجراحة الغدة الدرقية عن رقم ثابت غير نموذجي.",
+    "take_home": "بعد thyroid surgery فكّر في hematoma/airway، nerve injury، hypocalcemia، وأحيانًا thyroid storm أو tracheomalacia.",
+    "visual": "رسم thyroid anatomy مع recurrent laryngeal nerve وairway وموقع hematoma"
+  },
+  "surgery-1-0009": {
+    "answer": "Anal fissure",
+    "reasoning": "Lateral internal sphincterotomy تقلل ضغط internal anal sphincter وتُستخدم لعلاج chronic anal fissure عندما تكون الجراحة مناسبة. الفكرة الأساسية هي كسر دائرة الألم والتشنج وتحسين الالتئام.",
+    "distractors": "Hemorrhoids لها علاجات مختلفة حسب الدرجة. Perianal abscess يحتاج drainage، وhematoma أو intrasphincteric abscess ليست indications معتادة لـlateral internal sphincterotomy.",
+    "trap": "Trigger Word: lateral internal sphincterotomy. اربطها مباشرةً بـchronic anal fissure.",
+    "take_home": "Lateral internal sphincterotomy → chronic anal fissure، مع الانتباه لخطر fecal incontinence في اختيار المرضى.",
+    "visual": "رسم anal canal يوضح internal anal sphincter ومكان lateral sphincterotomy"
+  },
+  "surgery-1-0010": {
+    "answer": "Arterial hypertension (>160/95 mm Hg)",
+    "reasoning": "في السؤال، uncontrolled severe arterial hypertension هو الخيار المصنف كـabsolute contraindication لـcombined OCP. أما migraine without aura أو controlled diabetes/hypertension فليست مطلقة بنفس الصورة، بينما العمر وحده لا يكفي دون عوامل أخرى.",
+    "distractors": "Gallstones ليست absolute contraindication بحد ذاتها، وmigraine without aura ليست مثل migraine with aura. Controlled DM/HTN تختلف عن severe uncontrolled hypertension. Age >35 وحده ليس قاعدة مطلقة دون سياق وعوامل خطر أخرى.",
+    "trap": "Trigger Word: absolute contraindication. ميّز severe uncontrolled hypertension عن controlled hypertension وmigraine with aura.",
+    "take_home": "Combined OCP + severe uncontrolled hypertension = major/absolute contraindication في إطار هذا السؤال.",
+    "visual": "بطاقة OCP contraindications مع إبراز severe hypertension ومقارنة controlled vs uncontrolled"
+  }
+}
