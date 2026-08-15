@@ -11,7 +11,7 @@ for (const question of questions) {
   assert.deepEqual(scenes.map((scene) => scene.id), [
     "QUESTION", "ANSWER_PROPOSAL", "CLINICAL_REASONING", "DISTRACTORS", "EXAM_TRAP", "TAKE_HOME"
   ]);
-  assert.ok(scenes[1].dialogue.some((item) => item.name === "DR. ANAS"));
+  assert.ok(scenes.every((scene) => scene.dialogue.every((item) => item.name === "TEACHER")));
   assert.ok(scenes[2].dialogue.some((item) => item.name === "TEACHER"));
   assert.ok(scenes[5].visual.includes(question.source_indicated_answer));
 }
