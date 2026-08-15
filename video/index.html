@@ -4,16 +4,15 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Medical AI Teacher — Master Video</title>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
 <style>
 @font-face{font-family:"Noto Sans Arabic";src:local("Noto Sans Arabic"),local("Noto Sans Arabic Regular");font-weight:100 900;font-style:normal;font-display:swap}
 :root{--bg:#07111F;--panel:#0E2A36;--accent:#19C3B1;--accent2:#8BE9E0;--text:#F7FAFC;--muted:#B8C7D3}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Inter,"Noto Sans Arabic",Arial,sans-serif}
 [data-composition-id="medical-ai-master"]{width:1920px;height:1080px;position:relative;overflow:hidden;background:radial-gradient(circle at 75% 20%,#123441 0,transparent 38%),var(--bg)}
-.scene{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;width:100%;height:100%;padding:90px 150px 150px;gap:28px;opacity:0}.clip{will-change:transform,opacity}
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;width:100%;height:100%;padding:90px 150px 150px;gap:28px;opacity:0;visibility:hidden}.clip{will-change:transform,opacity}
 .kicker{font-size:26px;letter-spacing:.1em;color:var(--accent);font-weight:800}.title{font-size:68px;line-height:1.14;max-width:1550px;font-weight:800}.subtitle{font-size:36px;line-height:1.45;max-width:1500px}.card{background:rgba(14,42,54,.92);border:2px solid rgba(139,233,224,.18);border-radius:30px;padding:38px 48px;box-shadow:0 24px 70px rgba(0,0,0,.25)}.options{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:10px}.option{font-size:29px;padding:22px;border-radius:18px;background:rgba(255,255,255,.045);border:2px solid transparent}.correct{border-color:var(--accent);box-shadow:0 0 0 2px rgba(25,195,177,.15) inset}.speaker{font-size:23px;color:var(--accent2);font-weight:800;margin-bottom:8px}.line{font-size:34px;line-height:1.5;margin:7px 0}.ar{direction:rtl;text-align:right}.en{direction:ltr;text-align:left}.memory{font-size:54px;color:var(--accent2);font-weight:800}.footer{position:absolute;bottom:42px;left:150px;right:150px;display:flex;justify-content:space-between;color:rgba(247,250,252,.58);font-size:19px}.node{width:220px;height:220px;border-radius:50%;border:4px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;background:rgba(7,17,31,.8)}.sequence{display:flex;align-items:center;justify-content:center;gap:28px}.arrow{font-size:54px;color:var(--accent)}
 .audio-status{position:absolute;top:38px;right:150px;font-size:18px;color:var(--muted)}
-.caption{position:absolute;left:170px;right:170px;bottom:82px;z-index:20;display:flex;justify-content:center;opacity:0;pointer-events:none}.caption span{max-width:1500px;padding:12px 24px;border-radius:16px;background:rgba(0,0,0,.72);font-size:27px;line-height:1.35;text-align:center;text-shadow:0 2px 8px rgba(0,0,0,.5)}
+.caption{position:absolute;left:170px;right:170px;bottom:82px;z-index:20;display:flex;justify-content:center;opacity:0;visibility:hidden;pointer-events:none}.caption span{max-width:1500px;padding:12px 24px;border-radius:16px;background:rgba(0,0,0,.72);font-size:27px;line-height:1.35;text-align:center;text-shadow:0 2px 8px rgba(0,0,0,.5)}
 </style>
 </head>
 <body>
@@ -34,8 +33,26 @@
 <div class="audio-status">Voice profile: Clear Medical · AR/EN · synchronized</div><div class="footer"><span>Medical AI Teacher</span><span>Question → Reasoning → Memory</span></div>
 </div>
 <script>
-window.__timelines=window.__timelines||{};const root=document.querySelector('[data-composition-id="medical-ai-master"]');const scenes=[...root.querySelectorAll('.scene')];const captions=[...root.querySelectorAll('.caption')];const tl=gsap.timeline({paused:true});
-scenes.forEach(scene=>{const start=Number(scene.dataset.start);tl.from(scene,{opacity:0,duration:.55,ease:'power2.out'},start);tl.from(scene.querySelector('.kicker'),{y:18,opacity:0,duration:.45,ease:'power3.out'},start+.12);tl.from(scene.querySelector('.title'),{y:35,opacity:0,duration:.5,ease:'back.out(1.2)'},start+.22);tl.from(scene.querySelectorAll('.card,.sequence,.memory'),{y:25,opacity:0,duration:.45,stagger:.08,ease:'power2.out'},start+.38)});
-captions.forEach(c=>{const start=Number(c.dataset.start);tl.from(c,{opacity:0,y:10,duration:.3,ease:'power2.out'},start+.2)});window.__timelines['medical-ai-master']=tl;
+(function(){
+  const root=document.getElementById('medical-ai-master');
+  const scenes=[...root.querySelectorAll('.scene')];
+  const captions=[...root.querySelectorAll('.caption')];
+  function setVisible(el,on,progress){
+    el.style.opacity=on?'1':'0';
+    el.style.visibility=on?'visible':'hidden';
+    if(on){
+      const p=Math.max(0,Math.min(1,progress));
+      el.style.transform='translateY('+(p<0.08?(1-p/0.08)*18:0)+'px)';
+    }
+  }
+  function seek(time){
+    const t=Math.max(0,Number(time)||0);
+    scenes.forEach(el=>{const s=+el.dataset.start,d=+el.dataset.duration;setVisible(el,t>=s&&t<s+d,(t-s)/Math.min(d,0.6));});
+    captions.forEach(el=>{const s=+el.dataset.start,d=+el.dataset.duration;setVisible(el,t>=s&&t<s+d,1);});
+  }
+  window.__timelines=window.__timelines||{};
+  window.__timelines['medical-ai-master']={seek,progress:seek,totalDuration:60,duration:60};
+  seek(0);
+})();
 </script>
 </body></html>
