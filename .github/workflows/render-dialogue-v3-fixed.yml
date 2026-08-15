@@ -1,0 +1,56 @@
+name: Render Master Dialogue V3 Fixed
+
+on:
+  push:
+    branches: ["agent/import-full-question-bank"]
+    paths: [".github/workflows/render-dialogue-v3-fixed.yml"]
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install FFmpeg
+        run: sudo apt-get update -y && sudo apt-get install -y ffmpeg curl
+      - name: Build valid Arabic teacher audio
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p production/master-dialogue/audio production/master-dialogue/output
+          curl -L --fail --retry 5 --retry-delay 3 'https://www.aidocmaker.com/g0/audio?name=537c24e4a22c436b9b201d8f327a72ca' -o production/master-dialogue/audio/teacher-source.mp3
+          test -s production/master-dialogue/audio/teacher-source.mp3
+          ffmpeg -y -v error -i production/master-dialogue/audio/teacher-source.mp3 -ar 48000 -ac 2 -af apad -t 60 -c:a libmp3lame -b:a 160k production/master-dialogue/teacher-60s.mp3
+          D=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 production/master-dialogue/teacher-60s.mp3)
+          python3 -c "d=float('$D'); assert d>59, f'Audio too short: {d:.2f}s'; print(f'FULL AUDIO CHECK: {d:.2f}s')"
+      - name: Extract V3 composition
+        shell: bash
+        run: |
+          set -euo pipefail
+          awk '/cat > production\/master-v3\/index.html <<'"'"'HTML'"'"'/{flag=1;next}/^          HTML$/{flag=0}flag' .github/workflows/master-dialogue-prototype.yml | sed 's/^          //' > production/master-dialogue/index.html
+          test -s production/master-dialogue/index.html
+          sed -i 's/teacher-60s\.mp3/teacher-60s.mp3/g' production/master-dialogue/index.html
+      - name: Lint inspect render and verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save hyperframes
+          npx hyperframes lint production/master-dialogue --verbose
+          npx hyperframes inspect production/master-dialogue --strict --json
+          npx hyperframes render production/master-dialogue --output production/master-dialogue/output/question-0001-v3-ar-fixed.mp4 --quality standard --fps 30
+          test -s production/master-dialogue/output/question-0001-v3-ar-fixed.mp4
+          python3 - <<'PY'
+          import subprocess, json
+          p='production/master-dialogue/output/question-0001-v3-ar-fixed.mp4'
+          j=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-show_entries','stream=codec_type,codec_name,width,height','-of','json',p]))
+          assert any(s.get('codec_type')=='audio' for s in j.get('streams',[])), 'No audio stream'
+          assert float(j['format']['duration']) > 59, 'Video shorter than 59s'
+          print('FINAL MEDIA CHECK: audio stream present; video duration >59s')
+          PY
+      - name: Upload V3 fixed
+        uses: actions/upload-artifact@v4
+        with:
+          name: medical-ai-teacher-master-v3-q0001-ar-fixed
+          path: production/master-dialogue/output/question-0001-v3-ar-fixed.mp4
+          retention-days: 14
