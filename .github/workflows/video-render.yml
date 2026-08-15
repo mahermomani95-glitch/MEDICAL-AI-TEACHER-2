@@ -18,6 +18,7 @@ permissions:
 
 env:
   NODE_VERSION: 22
+  VOICE_URL: https://www.aidocmaker.com/g0/audio?name=4b6b8f9cdf324e1a855b85ffde67218d
 
 jobs:
   render-preview:
@@ -37,6 +38,12 @@ jobs:
             sudo apt-get install -y ffmpeg
           fi
           ffmpeg -version | head -n 1
+      - name: Download master voice
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 2 "$VOICE_URL" -o video/master-voice.mp3
+          ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 video/master-voice.mp3
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -49,6 +56,9 @@ jobs:
         run: npx hyperframes inspect video --strict --json
       - name: Render MP4 preview
         run: npx hyperframes render video --output medical-ai-teacher-preview.mp4 --quality "${{ inputs.quality || 'standard' }}" --fps 30
+      - name: Verify rendered media
+        run: |
+          ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,width,height,r_frame_rate -of json medical-ai-teacher-preview.mp4
       - name: Upload preview
         uses: actions/upload-artifact@v4
         with:
