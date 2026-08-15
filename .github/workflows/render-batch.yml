@@ -1,6 +1,12 @@
 name: Medical AI Teacher — Dynamic Batch Render
 
 on:
+  push:
+    branches: ["agent/import-full-question-bank"]
+    paths:
+      - "production/batch-*.json"
+      - "production/scripts/build-batch.mjs"
+      - ".github/workflows/render-batch.yml"
   workflow_dispatch:
     inputs:
       batch:
@@ -13,30 +19,67 @@ on:
         default: 'production/generated'
 
 jobs:
-  prepare-batch:
+  render-batch:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Install FFmpeg
+        run: sudo apt-get update -y && sudo apt-get install -y ffmpeg
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Install HyperFrames
+        run: npm install --no-save hyperframes
       - name: Build question compositions
-        run: node production/scripts/build-batch.mjs "${{ inputs.batch }}" "${{ inputs.output }}"
+        env:
+          BATCH: ${{ inputs.batch || 'production/batch-001.json' }}
+          OUTPUT: ${{ inputs.output || 'production/generated' }}
+        run: node production/scripts/build-batch.mjs "$BATCH" "$OUTPUT"
       - name: Validate single-teacher rule
+        env:
+          OUTPUT: ${{ inputs.output || 'production/generated' }}
         shell: bash
         run: |
-          if grep -RniE 'Dr\. Anas|MAHER|student|dialogue|conversation' "${{ inputs.output }}"; then
+          set -euo pipefail
+          if grep -RniE 'Dr\. Anas|MAHER|student|dialogue|conversation' "$OUTPUT"; then
             echo 'Forbidden secondary-character text detected.'
             exit 1
           fi
-      - name: Validate required visual plan
+      - name: Lint and inspect every composition
+        env:
+          OUTPUT: ${{ inputs.output || 'production/generated' }}
         shell: bash
         run: |
-          test -n "$(find "${{ inputs.output }}" -name metadata.json -print -quit)"
-      - name: Upload batch compositions
+          set -euo pipefail
+          count=0
+          while IFS= read -r index; do
+            dir="$(dirname "$index")"
+            npx hyperframes lint "$dir" --verbose
+            npx hyperframes inspect "$dir" --strict --json > /dev/null
+            count=$((count+1))
+          done < <(find "$OUTPUT" -name index.html -type f | sort)
+          test "$count" -gt 0
+          echo "Validated $count compositions"
+      - name: Render MP4 for every question
+        env:
+          OUTPUT: ${{ inputs.output || 'production/generated' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r index; do
+            dir="$(dirname "$index")"
+            id="$(basename "$dir")"
+            mkdir -p "$OUTPUT/mp4"
+            npx hyperframes render "$dir" --output "$OUTPUT/mp4/$id.mp4" --quality standard --fps 30
+            ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,width,height -of json "$OUTPUT/mp4/$id.mp4" > "$OUTPUT/mp4/$id.media.json"
+            test -s "$OUTPUT/mp4/$id.mp4"
+          done < <(find "$OUTPUT" -mindepth 2 -maxdepth 2 -name index.html -type f | sort)
+      - name: Upload rendered batch
         uses: actions/upload-artifact@v4
         with:
-          name: medical-ai-teacher-${{ github.run_number }}-compositions
-          path: ${{ inputs.output }}
+          name: medical-ai-teacher-${{ github.run_number }}-mp4-batch
+          path: ${{ inputs.output || 'production/generated' }}/mp4
+          retention-days: 14
