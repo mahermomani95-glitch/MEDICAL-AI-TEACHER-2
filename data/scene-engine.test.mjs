@@ -11,9 +11,13 @@ for (const question of questions) {
   assert.deepEqual(scenes.map((scene) => scene.id), [
     "QUESTION", "ANSWER_PROPOSAL", "CLINICAL_REASONING", "DISTRACTORS", "EXAM_TRAP", "TAKE_HOME"
   ]);
-  assert.ok(scenes[1].dialogue.some((item) => item.name === "DR. ANAS"));
-  assert.ok(scenes[2].dialogue.some((item) => item.name === "TEACHER"));
-  assert.ok(scenes[5].visual.includes(question.source_indicated_answer));
+  for (const scene of scenes) {
+    assert.ok(scene.dialogue.length > 0, `${question.id}: scene must have narration`);
+    assert.ok(scene.dialogue.every((item) => item.name === "TEACHER"), `${question.id}: teacher-only narration required`);
+    assert.ok(scene.dialogue.every((item) => item.parts.every((part) => part.type === "ar")), `${question.id}: Arabic-only narration required`);
+  }
+  assert.ok(scenes.every((scene) => scene.visual && scene.visual.length > 0), `${question.id}: every scene needs a visual`);
+  assert.ok(scenes[5].visual.includes("قاعدة واحدة تحفظها"));
 }
 
-console.log(`Scene engine tests passed for ${questions.length} question(s).`);
+console.log(`Teacher-only Arabic scene tests passed for ${questions.length} question(s).`);
