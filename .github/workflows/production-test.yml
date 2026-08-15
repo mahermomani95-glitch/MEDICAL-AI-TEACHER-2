@@ -1,0 +1,14 @@
+name: Production Test
+
+on:
+  push:
+    branches:
+      - agent/import-full-question-bank
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test runner
+        run: echo "Production workflow parser is working"
