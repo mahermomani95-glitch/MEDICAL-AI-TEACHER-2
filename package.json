@@ -14,7 +14,8 @@
     "test:render-html": "node data/render-html.test.mjs",
     "test:voice-config": "node data/voice-config.test.mjs",
     "test:audio-timeline": "node data/audio-timeline.test.mjs",
-    "test": "npm run test:scene-engine && npm run test:video-script && npm run test:video-engine && npm run test:video-renderer && npm run test:render-html && npm run test:voice-config && npm run test:audio-timeline",
+    "test:voice-render-plan": "node data/voice-render-plan.test.mjs",
+    "test": "npm run test:scene-engine && npm run test:video-script && npm run test:video-engine && npm run test:video-renderer && npm run test:render-html && npm run test:voice-config && npm run test:audio-timeline && npm run test:voice-render-plan",
     "preview": "vite preview"
   },
   "devDependencies": {
