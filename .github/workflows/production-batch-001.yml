@@ -36,7 +36,7 @@ jobs:
           set -euo pipefail
           mkdir -p production/audio
           for n in 01 02 03 04 05 06; do
-            url="${VOICE_${n}_URL}"
+            url="$(printenv VOICE_${n}_URL)"
             curl --http1.1 -fL --retry 5 --retry-all-errors --retry-delay 2 -A "Mozilla/5.0" "$url" -o "production/audio/${n}.mp3"
             test -s "production/audio/${n}.mp3"
             ffprobe -v error -show_entries format=format_name,duration -of default=noprint_wrappers=1 "production/audio/${n}.mp3"
