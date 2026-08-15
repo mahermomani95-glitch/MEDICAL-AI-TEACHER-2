@@ -1,5 +1,6 @@
 name: Medical AI Teacher — Main Batch Render
 
+# Production trigger: run Batch 001 automatically on workflow changes.
 on:
   push:
     branches: ["main"]
