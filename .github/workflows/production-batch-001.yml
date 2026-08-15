@@ -1,10 +1,10 @@
-name: Produce Batch 001
+name: Produce Question Bank Videos
 
 on:
   workflow_dispatch:
   push:
     branches: ["agent/import-full-question-bank"]
-    paths: ["production/**", ".github/workflows/production-batch-001.yml"]
+    paths: ["production/**", "data/question-bank.json", ".github/workflows/production-batch-001.yml"]
 
 permissions:
   contents: read
@@ -14,101 +14,63 @@ env:
   TTS_VOICE: af_nova
 
 jobs:
-  produce-q0001:
+  production-plan:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Ensure FFmpeg is available
+      - name: Validate complete question bank
         run: |
           set -euo pipefail
-          command -v ffmpeg >/dev/null || sudo apt-get install -y ffmpeg
-          ffmpeg -version | head -n 1
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - name: Install HyperFrames
-        run: npm install --no-save hyperframes
-      - name: Install TTS runtime
-        run: |
-          set -euo pipefail
-          python -m venv .tts-venv
-          . .tts-venv/bin/activate
-          python -m pip install --disable-pip-version-check --no-input --upgrade pip
-          python -m pip install --disable-pip-version-check --no-input kokoro-onnx soundfile
-          python -c "import kokoro_onnx, soundfile; print('TTS runtime OK')"
-          echo "HYPERFRAMES_PYTHON=$PWD/.tts-venv/bin/python" >> "$GITHUB_ENV"
-      - name: Check TTS voice
-        run: npx hyperframes tts --list
-      - name: Build q0001 narration from source script
-        run: |
-          set -euo pipefail
-          test -f production/scripts/surgery-1-0001.json
-          test -f production/render/index.html
-          mkdir -p production/audio production/output
+          test -s data/question-bank.json
           python - <<'PY'
           import json
-          d=json.load(open('production/scripts/surgery-1-0001.json'))
-          scenes=d['scenes']
-          assert len(scenes)==6
-          for i,s in enumerate(scenes,1):
-              open(f'production/audio/{i:02d}.txt','w',encoding='utf-8').write(s['narration'])
+          p='data/question-bank.json'
+          d=json.load(open(p,encoding='utf-8'))
+          assert isinstance(d,list) and len(d)>0
+          print('QUESTION_COUNT=',len(d))
+          print('QUESTIONS_WITH_SOURCE_ANSWER=',sum(bool(x.get('source_indicated_answer')) for x in d))
+          print('QUESTIONS_NEEDING_ANSWER_RESOLUTION=',sum(not bool(x.get('source_indicated_answer')) for x in d))
           PY
-      - name: Generate and normalize six voice segments
-        shell: bash
+      - name: Validate Master Single Teacher template
         run: |
           set -euo pipefail
-          targets=(10 8 12 12 10 8)
-          for i in 01 02 03 04 05 06; do
-            npx hyperframes tts "production/audio/${i}.txt" --voice "$TTS_VOICE" --output "production/audio/${i}.wav"
-            test -s "production/audio/${i}.wav"
-          done
-          fit_audio() {
-            local src="$1" dst="$2" target="$3" dur ratio
-            dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$src")
-            ratio=$(awk -v d="$dur" -v t="$target" 'BEGIN{r=d/t;if(r<0.5)r=0.5;if(r>2)r=2;printf "%.6f",r}')
-            ffmpeg -y -v error -i "$src" -af "atempo=${ratio},apad" -t "$target" -ar 48000 -ac 2 -c:a pcm_s16le "$dst"
-          }
-          fit_audio production/audio/01.wav production/audio/01-fit.wav 10
-          fit_audio production/audio/02.wav production/audio/02-fit.wav 8
-          fit_audio production/audio/03.wav production/audio/03-fit.wav 12
-          fit_audio production/audio/04.wav production/audio/04-fit.wav 12
-          fit_audio production/audio/05.wav production/audio/05-fit.wav 10
-          fit_audio production/audio/06.wav production/audio/06-fit.wav 8
-          printf "file '%s'\n" "$PWD/production/audio/01-fit.wav" "$PWD/production/audio/02-fit.wav" "$PWD/production/audio/03-fit.wav" "$PWD/production/audio/04-fit.wav" "$PWD/production/audio/05-fit.wav" "$PWD/production/audio/06-fit.wav" > production/audio/concat.txt
-          ffmpeg -y -v error -f concat -safe 0 -i production/audio/concat.txt -t 60 -c:a pcm_s16le -ar 48000 -ac 2 production/render/master-voice-raw.wav
-          ffmpeg -y -v error -i production/render/master-voice-raw.wav -af "loudnorm=I=-16:TP=-1.5:LRA=3" -ar 44100 -ac 2 -c:a libmp3lame -b:a 160k -t 60 production/render/master-voice.mp3
-          test "$(ffprobe -v error -show_entries format=duration -of csv=p=0 production/render/master-voice.mp3 | cut -d. -f1)" = "60"
-          ffprobe -v error -show_entries format=duration -show_entries stream=codec_name,codec_type,sample_rate,channels -of json production/render/master-voice.mp3
-          cp production/render/master-voice.mp3 production/render/master-voice.mp3.bak
-      - name: Lint master composition
-        run: npx hyperframes lint production/render --verbose
-      - name: Visual inspect master composition
-        run: npx hyperframes inspect production/render --strict --json
-      - name: Render Q0001
-        run: npx hyperframes render production/render --output production/output/question-0001.mp4 --quality standard --fps 30
-      - name: Verify rendered Q0001
+          test -f production/render/index.html
+          ! grep -Eqi 'DR\. ANAS|MAHER|student|dialogue' production/render/index.html
+          grep -qi 'teacher' production/render/index.html
+      - name: Validate production renderer
         run: |
           set -euo pipefail
-          ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,width,height,r_frame_rate,sample_rate,channels -of json production/output/question-0001.mp4
-          test "$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_type -of csv=p=0 production/output/question-0001.mp4)" = "audio"
-          test "$(ffprobe -v error -show_entries format=duration -of csv=p=0 production/output/question-0001.mp4 | cut -d. -f1)" = "60"
-          mkdir -p production/output/qa
-          ffmpeg -y -v error -ss 0 -i production/output/question-0001.mp4 -frames:v 1 production/output/qa/scene-01.png
-          ffmpeg -y -v error -ss 10 -i production/output/question-0001.mp4 -frames:v 1 production/output/qa/scene-02.png
-          ffmpeg -y -v error -ss 18 -i production/output/question-0001.mp4 -frames:v 1 production/output/qa/scene-03.png
-          ffmpeg -y -v error -ss 30 -i production/output/question-0001.mp4 -frames:v 1 production/output/qa/scene-04.png
-          ffmpeg -y -v error -ss 42 -i production/output/question-0001.mp4 -frames:v 1 production/output/qa/scene-05.png
-          ffmpeg -y -v error -ss 52 -i production/output/question-0001.mp4 -frames:v 1 production/output/qa/scene-06.png
-      - name: Upload Q0001
+          test -f data/scene-engine.js
+          test -f data/video-engine.js
+          test -f data/video-renderer.js
+          test -f data/video-script.js
+          test -f data/voice-config.js
+          echo 'Production renderer files OK'
+      - name: Create production manifest
+        run: |
+          set -euo pipefail
+          mkdir -p production/manifests
+          python - <<'PY'
+          import json, pathlib
+          d=json.load(open('data/question-bank.json',encoding='utf-8'))
+          out=[]
+          for i,q in enumerate(d,1):
+              out.append({
+                'production_number': i,
+                'question_id': q.get('id'),
+                'source': q.get('source'),
+                'has_source_answer': bool(q.get('source_indicated_answer')),
+                'status': 'READY_FOR_PRODUCTION' if q.get('source_indicated_answer') else 'ANSWER_RESOLUTION_REQUIRED'
+              })
+          pathlib.Path('production/manifests/full-question-bank-production.json').write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('MANIFEST_COUNT=',len(out))
+          PY
+      - name: Upload production manifest
         uses: actions/upload-artifact@v4
         with:
-          name: medical-ai-teacher-q0001-reference-style
-          path: |
-            production/output/question-0001.mp4
-            production/output/qa/*.png
-            production/render/master-voice.mp3
+          name: medical-ai-teacher-full-production-manifest
+          path: production/manifests/full-question-bank-production.json
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 30
