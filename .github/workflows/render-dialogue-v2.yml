@@ -1,0 +1,52 @@
+name: Render Dialogue V2
+
+on:
+  push:
+    branches: ["agent/import-full-question-bank"]
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install FFmpeg
+        run: sudo apt-get update -y && sudo apt-get install -y ffmpeg curl
+      - name: Build Arabic dialogue audio
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p production/master-dialogue/audio production/master-dialogue/output
+          urls=(
+            'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/a82ceb86-34b7-4709-a783-bc4184ce3af5.mp3'
+            'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/cce18d16-39b0-4803-bf40-a4be58d7e729.mp3'
+            'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/b3db6a2d-dd78-43ec-b34c-e29d338e3baf.mp3'
+            'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/8752b735-99d8-4b08-9df3-505d395e4f90.mp3'
+            'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/9e3ea25b-343a-4db7-a221-8163106f7882.mp3'
+            'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/bef14e66-c57f-4726-a8f1-c89388c6147e.mp3'
+          )
+          i=1
+          for u in "${urls[@]}"; do curl -L --fail --retry 5 --retry-delay 3 "$u" -o "production/master-dialogue/audio/$i.mp3"; ffmpeg -y -v error -i "production/master-dialogue/audio/$i.mp3" -ar 48000 -ac 2 "production/master-dialogue/audio/$i.wav"; i=$((i+1)); done
+          printf "file '%s'\n" "$PWD/production/master-dialogue/audio/1.wav" "$PWD/production/master-dialogue/audio/2.wav" "$PWD/production/master-dialogue/audio/3.wav" "$PWD/production/master-dialogue/audio/4.wav" "$PWD/production/master-dialogue/audio/5.wav" "$PWD/production/master-dialogue/audio/6.wav" > production/master-dialogue/concat.txt
+          ffmpeg -y -v error -f concat -safe 0 -i production/master-dialogue/concat.txt -af 'apad' -t 60 -ar 48000 -ac 2 -c:a libmp3lame -b:a 160k production/master-dialogue/master-voice.mp3
+      - name: Extract V2 composition
+        shell: bash
+        run: |
+          set -euo pipefail
+          awk '/cat > production\/master-dialogue\/index.html <<'"'"'HTML'"'"'/{flag=1;next}/^          HTML$/{flag=0}flag' .github/workflows/master-dialogue-prototype.yml | sed 's/^          //' > production/master-dialogue/index.html
+          test -s production/master-dialogue/index.html
+      - name: Lint and render V2
+        run: |
+          set -euo pipefail
+          npm install --no-save hyperframes
+          npx hyperframes lint production/master-dialogue --verbose
+          npx hyperframes inspect production/master-dialogue --strict --json
+          npx hyperframes render production/master-dialogue --output production/master-dialogue/output/question-0001-dialogue-ar-v2.mp4 --quality standard --fps 30
+          ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,width,height -of json production/master-dialogue/output/question-0001-dialogue-ar-v2.mp4
+      - name: Upload V2
+        uses: actions/upload-artifact@v4
+        with:
+          name: medical-ai-teacher-master-dialogue-ar-q0001-v2
+          path: production/master-dialogue/output/question-0001-dialogue-ar-v2.mp4
+          retention-days: 14
