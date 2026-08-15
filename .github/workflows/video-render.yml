@@ -26,8 +26,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Verify FFmpeg
-        run: ffmpeg -version
+      - name: Ensure FFmpeg is available
+        shell: bash
+        run: |
+          set -euo pipefail
+          if command -v ffmpeg >/dev/null 2>&1; then
+            echo "Using preinstalled FFmpeg: $(command -v ffmpeg)"
+          else
+            echo "FFmpeg is not preinstalled; installing from the runner package cache"
+            sudo apt-get install -y ffmpeg
+          fi
+          ffmpeg -version | head -n 1
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
