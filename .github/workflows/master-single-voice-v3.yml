@@ -1,0 +1,167 @@
+name: Master Single Voice V3
+
+on:
+  push:
+    branches: ["agent/import-full-question-bank"]
+    paths: [".github/workflows/master-single-voice-v3.yml"]
+  workflow_dispatch:
+
+jobs:
+  render-single-voice-v3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install FFmpeg
+        run: sudo apt-get update -y && sudo apt-get install -y ffmpeg curl
+
+      - name: Build single Arabic teacher audio
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p production/master-single-v3/output
+          curl -L --fail --retry 5 --retry-delay 3 \
+            'https://www.aidocmaker.com/g0/audio?name=537c24e4a22c436b9b201d8f327a72ca' \
+            -o production/master-single-v3/teacher-source.mp3
+          test -s production/master-single-v3/teacher-source.mp3
+          ffmpeg -y -v error -i production/master-single-v3/teacher-source.mp3 \
+            -ar 48000 -ac 2 -af apad -t 75 -c:a libmp3lame -b:a 160k \
+            production/master-single-v3/teacher-voice.mp3
+          ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 production/master-single-v3/teacher-voice.mp3
+
+      - name: Build V3 composition
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > production/master-single-v3/index.html <<'HTML'
+          <!doctype html>
+          <html lang="ar">
+          <head>
+            <meta charset="utf-8">
+            <style>
+              *{box-sizing:border-box}
+              html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07111f;color:#f7fafc;font-family:Inter,Arial,sans-serif}
+              .stage{width:1920px;height:1080px;position:relative;background:radial-gradient(circle at 82% 14%,#17475a 0,transparent 34%),radial-gradient(circle at 12% 88%,#12344a 0,transparent 30%),#07111f}
+              .top{position:absolute;top:36px;left:100px;right:100px;display:flex;justify-content:space-between;direction:ltr;color:#8be9e0;font-size:25px;font-weight:800}
+              .scene{position:absolute;inset:0;padding:125px 110px 85px;opacity:0;visibility:hidden;display:flex;flex-direction:column;gap:24px}
+              .question{font-size:54px;line-height:1.2;font-weight:850;direction:rtl;text-align:right;max-width:1680px}
+              .sub{font-size:31px;line-height:1.35;direction:rtl;text-align:right;color:#cfe5ea}
+              .options{display:grid;grid-template-columns:1fr 1fr;gap:18px;direction:ltr}
+              .option{min-height:105px;padding:24px 30px;border-radius:22px;background:#102c3a;border:2px solid rgba(139,233,224,.22);font-size:36px;font-weight:800;display:flex;align-items:center}
+              .option.correct{border-color:#8be9e0;background:#123f45}
+              .callout{padding:22px 30px;border-radius:24px;background:rgba(12,42,54,.94);border:2px solid rgba(139,233,224,.22);font-size:35px;line-height:1.35;direction:rtl;text-align:right}
+              .visuals{display:flex;gap:24px;direction:ltr;flex:1;min-height:420px}
+              .card{flex:1;background:rgba(10,28,39,.92);border:2px solid rgba(139,233,224,.2);border-radius:26px;padding:18px;display:flex;flex-direction:column;justify-content:center}
+              .title{text-align:center;font-size:28px;font-weight:850;color:#8be9e0;margin-bottom:12px}
+              svg{width:100%;height:260px;display:block}
+              .factor-grid{display:flex;justify-content:center;gap:18px;flex-wrap:wrap}
+              .factor{padding:18px 25px;border-radius:18px;background:#173b4b;font-size:38px;font-weight:900}
+              .vk{border:2px solid #f1c46a}.notvk{border:2px solid #8be9e0}
+              .reasoning{display:grid;grid-template-columns:1fr 1fr;gap:20px;direction:ltr}
+              .reason{padding:24px;border-radius:22px;background:#102c3a;font-size:31px;line-height:1.35;direction:rtl;text-align:right}
+              .answer{font-size:72px;font-weight:950;color:#8be9e0;text-align:center;direction:rtl}
+              .tip{font-size:38px;font-weight:800;text-align:center;direction:rtl;color:#f1c46a}
+              .footer{position:absolute;bottom:28px;left:110px;right:110px;text-align:center;font-size:22px;color:rgba(247,250,252,.65);direction:rtl}
+            </style>
+          </head>
+          <body>
+            <div id="medical-ai-single-v3" class="stage" data-composition-id="medical-ai-single-v3" data-start="0" data-duration="75" data-fps="30" data-width="1920" data-height="1080">
+              <audio id="teacher-voice" src="teacher-voice.mp3" data-start="0" data-duration="75"></audio>
+              <div class="top"><span>MEDICAL AI TEACHER</span><span>QUESTION 0001 · MASTER V3</span></div>
+
+              <section id="s1" class="scene" data-start="0" data-duration="12.5">
+                <div class="question">في obstructive jaundice، أي clotting factor لا يعتمد على Vitamin K؟</div>
+                <div class="sub">اقرأ السؤال أولًا، ثم قارن الخيارات قبل أن تفكر في الإجابة.</div>
+                <div class="options">
+                  <div class="option">A — Factor II</div><div class="option">B — Factor VII</div>
+                  <div class="option">C — Factor VIII</div><div class="option">D — Factor IX</div>
+                </div>
+                <div class="callout">المعلّم: المطلوب هنا هو تحديد <b>الاستثناء</b>، وليس مجرد حفظ رقم العامل.</div>
+                <div class="footer">السؤال + الخيارات + طريقة التفكير</div>
+              </section>
+
+              <section id="s2" class="scene" data-start="12.5" data-duration="12.5">
+                <div class="question">خلينا نفهم الـmechanism بصريًا.</div>
+                <div class="visuals">
+                  <div class="card"><div class="title">Obstructive jaundice</div>
+                    <svg viewBox="0 0 700 260"><path d="M95 100 Q180 35 340 55 Q500 72 600 135 Q500 205 330 205 Q170 205 95 150 Z" fill="#9b684d" stroke="#f1c46a" stroke-width="6"/><path d="M335 125 L465 145 L595 145" fill="none" stroke="#8be9e0" stroke-width="13" stroke-linecap="round"/><circle cx="470" cy="145" r="18" fill="#f1c46a"/><path d="M595 145 L650 205" fill="none" stroke="#8be9e0" stroke-width="10"/><text x="160" y="135" fill="#fff" font-size="30">Liver</text><text x="430" y="128" fill="#fff" font-size="26">Bile duct</text><text x="445" y="185" fill="#f1c46a" font-size="25">obstruction</text></svg>
+                  </div>
+                  <div class="card"><div class="title">Vitamin K pathway</div><div class="factor-grid"><span class="factor vk">II</span><span class="factor vk">VII</span><span class="factor vk">IX</span><span class="factor vk">X</span><span class="factor notvk">VIII</span></div></div>
+                </div>
+                <div class="callout">عند وجود obstruction، يقل امتصاص Vitamin K؛ لذلك نركز على العوامل التي تعتمد عليه.</div>
+                <div class="footer">الصورة تشرح الـmechanism بدل الحفظ فقط</div>
+              </section>
+
+              <section id="s3" class="scene" data-start="25" data-duration="12.5">
+                <div class="question">أي عوامل التخثر تعتمد على Vitamin K؟</div>
+                <div class="visuals">
+                  <div class="card"><div class="title">Vitamin K dependent</div><div class="factor-grid"><span class="factor vk">II</span><span class="factor vk">VII</span><span class="factor vk">IX</span><span class="factor vk">X</span></div></div>
+                  <div class="card"><div class="title">The exception</div><div class="factor-grid"><span class="factor notvk">VIII</span></div></div>
+                </div>
+                <div class="reasoning"><div class="reason">II، VII، IX، X = Vitamin K dependent</div><div class="reason">VIII = ليس Vitamin K dependent</div></div>
+                <div class="footer">احفظ المجموعة، ثم ابحث عن الاستثناء</div>
+              </section>
+
+              <section id="s4" class="scene" data-start="37.5" data-duration="12.5">
+                <div class="question">نحلها بالاستبعاد.</div>
+                <div class="options">
+                  <div class="option">A — Factor II → Vitamin K dependent</div><div class="option">B — Factor VII → Vitamin K dependent</div>
+                  <div class="option correct">C — Factor VIII → الاستثناء</div><div class="option">D — Factor IX → Vitamin K dependent</div>
+                </div>
+                <div class="callout">إذن A وB وD ينتمون إلى المجموعة نفسها. الخيار المختلف هو C.</div>
+                <div class="tip">Eliminate → Compare → Choose</div>
+                <div class="footer">الاستبعاد يجعل الإجابة أسرع وأثبت</div>
+              </section>
+
+              <section id="s5" class="scene" data-start="50" data-duration="12.5">
+                <div class="question">الـreasoning النهائي</div>
+                <div class="visuals">
+                  <div class="card"><div class="title">Vitamin K dependent</div><div class="factor-grid"><span class="factor vk">II</span><span class="factor vk">VII</span><span class="factor vk">IX</span><span class="factor vk">X</span></div></div>
+                  <div class="card"><div class="title">Correct exception</div><div class="factor-grid"><span class="factor notvk">VIII</span></div></div>
+                </div>
+                <div class="answer">C — Factor VIII</div>
+                <div class="callout">Factor VIII لا يعتمد على Vitamin K، ولذلك هو الإجابة الصحيحة.</div>
+                <div class="footer">الإجابة الصحيحة</div>
+              </section>
+
+              <section id="s6" class="scene" data-start="62.5" data-duration="12.5">
+                <div class="question">Exam Tip — خذها كـpattern واحد.</div>
+                <div class="visuals">
+                  <div class="card"><div class="title">Vitamin K dependent</div><div class="factor-grid"><span class="factor vk">II</span><span class="factor vk">VII</span><span class="factor vk">IX</span><span class="factor vk">X</span></div></div>
+                  <div class="card"><div class="title">Exception</div><div class="answer">VIII</div></div>
+                </div>
+                <div class="answer">II + VII + IX + X = Vitamin K</div>
+                <div class="tip">أما VIII فهو الاستثناء.</div>
+                <div class="footer">فهم → Reasoning → Answer → Take-home</div>
+              </section>
+
+              <script>
+                (function(){
+                  const scenes=[...document.querySelectorAll('.scene')];
+                  function seek(t){scenes.forEach(x=>{const a=Number(x.dataset.start),b=a+Number(x.dataset.duration);const on=t>=a&&t<b;x.style.opacity=on?'1':'0';x.style.visibility=on?'visible':'hidden'})}
+                  window.__timelines=window.__timelines||{};
+                  window.__timelines['medical-ai-single-v3']={seek,progress:seek,totalDuration:75,duration:75};
+                  seek(0);
+                })();
+              </script>
+            </div>
+          </body>
+          </html>
+          HTML
+
+      - name: Lint inspect and render V3
+        run: |
+          set -euo pipefail
+          npm install --no-save hyperframes
+          npx hyperframes lint production/master-single-v3 --verbose
+          npx hyperframes inspect production/master-single-v3 --strict --json
+          npx hyperframes render production/master-single-v3 --output production/master-single-v3/output/question-0001-single-voice-ar-v3.mp4 --quality standard --fps 30
+          ffprobe -v error -show_entries format=duration:stream=codec_type,codec_name,width,height -of json production/master-single-v3/output/question-0001-single-voice-ar-v3.mp4
+
+      - name: Upload V3
+        uses: actions/upload-artifact@v4
+        with:
+          name: medical-ai-teacher-master-single-voice-ar-q0001-v3
+          path: production/master-single-v3/output/question-0001-single-voice-ar-v3.mp4
+          retention-days: 14
