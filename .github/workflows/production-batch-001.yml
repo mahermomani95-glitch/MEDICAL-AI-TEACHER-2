@@ -14,9 +14,9 @@ env:
   TTS_VOICE: af_nova
 
 jobs:
-  produce-q0001:
+  produce-batch-001:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,56 +42,63 @@ jobs:
           echo "HYPERFRAMES_PYTHON=$PWD/.tts-venv/bin/python" >> "$GITHUB_ENV"
       - name: Check TTS voices
         run: npx hyperframes tts --list
-      - name: Generate production narration locally
+      - name: Produce Batch 001
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p production/audio production/render
-          printf '%s\n' 'In obstructive jaundice, bleeding tendency is due to deficiency of the following clotting factors except? The options are factor two, factor seven, factor eight, factor nine and factor ten. Dr. Anas proposes factor eight.' > production/audio/01.txt
-          printf '%s\n' 'Correct. Factor eight is the exception. The key is to recognize which clotting factors depend on vitamin K.' > production/audio/02.txt
-          printf '%s\n' 'Obstructive jaundice reduces bile delivery to the intestine. This impairs absorption of fat-soluble vitamin K. As a result, vitamin K-dependent clotting factors, especially factors two, seven, nine and ten, decrease.' > production/audio/03.txt
-          printf '%s\n' 'Why are the other choices wrong? Factors two, seven, nine and ten are vitamin K dependent, so they are reduced when vitamin K absorption is impaired. Factor eight is not vitamin K dependent, so it is the exception.' > production/audio/04.txt
-          printf '%s\n' 'Exam trap: do not confuse factor eight with the vitamin K-dependent factors. The high-yield sequence is two, seven, nine and ten.' > production/audio/05.txt
-          printf '%s\n' 'Take-home: obstructive jaundice means reduced vitamin K absorption and reduced factors two, seven, nine and ten. Factor eight is the exception.' > production/audio/06.txt
-          for n in 01 02 03 04 05 06; do
-            npx hyperframes tts "production/audio/${n}.txt" --voice "$TTS_VOICE" --output "production/audio/${n}.wav"
-            test -s "production/audio/${n}.wav"
-            ffprobe -v error -show_entries format=format_name,duration -of default=noprint_wrappers=1 "production/audio/${n}.wav"
-          done
+          rm -rf production/work production/output
+          mkdir -p production/work production/output
+          python - <<'PY'
+          import html, json, os
+          data=json.load(open('production/batch-001.json'))
+          css='''*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07111F;color:#F7FAFC;font-family:Arial,sans-serif}.clip{visibility:hidden}[data-composition-id]{width:1920px;height:1080px;position:relative;overflow:hidden;background:radial-gradient(circle at 75% 20%,#123441 0,transparent 38%),#07111F}.scene{position:absolute;inset:0;padding:90px 150px 150px;display:flex;flex-direction:column;justify-content:center;gap:28px;opacity:0;visibility:hidden}.kicker{font-size:26px;letter-spacing:.08em;color:#19C3B1;font-weight:800}.title{font-size:58px;line-height:1.15;font-weight:800;max-width:1550px}.card{background:rgba(14,42,54,.92);border:2px solid rgba(139,233,224,.18);border-radius:30px;padding:38px 48px}.options{display:grid;grid-template-columns:1fr 1fr;gap:16px}.option{font-size:32px;padding:20px;border-radius:18px;background:rgba(255,255,255,.045)}.correct{border:2px solid #19C3B1}.line{font-size:34px;line-height:1.5}.memory{font-size:52px;color:#8BE9E0;font-weight:800}.caption{position:absolute;left:170px;right:170px;bottom:82px;z-index:20;display:flex;justify-content:center;opacity:0;visibility:hidden}.caption span{max-width:1500px;padding:12px 24px;border-radius:16px;background:rgba(0,0,0,.72);font-size:27px;line-height:1.35;text-align:center}.footer{position:absolute;bottom:42px;left:150px;right:150px;display:flex;justify-content:space-between;color:rgba(247,250,252,.58);font-size:19px}'''
+          for q in data['questions']:
+              num=int(q['id'].split('-')[-1]); n=f'{num:04d}'; work=f'production/work/q{n}'; os.makedirs(work,exist_ok=True)
+              opts=''.join(f'<div class="option {"correct" if i==q["correct_index"] else ""}">{chr(65+i)} — {html.escape(str(o))}</div>' for i,o in enumerate(q['options']))
+              answer=f'{q["correct_letter"]} — {html.escape(str(q["options"][q["correct_index"]]))}'
+              question=html.escape(q['question'])
+              specialty=html.escape(q['specialty']); year=html.escape(q['year']); qid=html.escape(q['id'])
+              captions=[f'{question}',f'Correct answer: {answer}.',f'Key point: the tested concept is {answer}.',f'Why? Review each option and identify why {answer} is the exception or best answer.',f'Exam trap: do not choose a distractor when the stem asks for the exception or best answer.',f'Take-home: remember the correct choice — {answer}.']
+              starts=[0,10,18,30,42,52]; durations=[10,8,12,12,10,8]
+              scenes=f'''<section id="scene-01" class="scene clip" data-start="0" data-duration="10"><div class="kicker">MEDICAL AI TEACHER · {specialty.upper()} {year}</div><div class="title">{question}</div><div class="card options">{opts}</div></section><section id="scene-02" class="scene clip" data-start="10" data-duration="8"><div class="kicker">ANSWER PROPOSAL · 02</div><div class="title">{answer}</div><div class="card"><div class="line">Dr. Anas proposes: {answer}.</div></div></section><section id="scene-03" class="scene clip" data-start="18" data-duration="12"><div class="kicker">CLINICAL REASONING · 03</div><div class="title">Understand the tested concept</div><div class="card"><div class="line">The correct choice is <b>{answer}</b>. Use the stem, options, and high-yield rule to reach the answer.</div></div></section><section id="scene-04" class="scene clip" data-start="30" data-duration="12"><div class="kicker">DISTRACTORS · 04</div><div class="title">Why are the other choices wrong?</div><div class="card"><div class="line">Compare every distractor with the stem. The best answer remains <b>{answer}</b>.</div></div></section><section id="scene-05" class="scene clip" data-start="42" data-duration="10"><div class="kicker">EXAM TRAP · 05</div><div class="title">Read the question wording carefully.</div><div class="card"><div class="line">Exception questions and best-answer questions are easy to reverse. Identify exactly what the stem asks.</div></div></section><section id="scene-06" class="scene clip" data-start="52" data-duration="8"><div class="kicker">TAKE HOME · 06</div><div class="title">Take-home</div><div class="memory">{answer}</div><div class="line">Correct answer for {qid}.</div></section>'''
+              caps=''.join(f'<div id="caption-{i:02d}" class="caption clip" data-start="{s}" data-duration="{d}"><span>{html.escape(c)}</span></div>' for i,(s,d,c) in enumerate(zip(starts,durations,captions),1))
+              js="""(function(){const r=document.getElementById('medical-ai-master'),e=[...r.querySelectorAll('.scene')],c=[...r.querySelectorAll('.caption')];function v(x,on){x.style.opacity=on?'1':'0';x.style.visibility=on?'visible':'hidden'}function seek(t){e.forEach(x=>v(x,t>=+x.dataset.start&&t<+x.dataset.start+ +x.dataset.duration));c.forEach(x=>v(x,t>=+x.dataset.start&&t<+x.dataset.start+ +x.dataset.duration))}window.__timelines=window.__timelines||{};window.__timelines['medical-ai-master']={seek,progress:seek,totalDuration:60,duration:60};seek(0)})();"""
+              open(f'{work}/index.html','w').write(f'<!doctype html><html><head><meta charset="utf-8"><title>Medical AI Teacher — {qid}</title><style>{css}</style></head><body><div id="medical-ai-master" data-composition-id="medical-ai-master" data-start="0" data-duration="60" data-fps="30" data-width="1920" data-height="1080"><audio id="master-voice" src="master-voice.mp3" data-start="0" data-duration="60" data-track-index="2" data-volume="1"></audio>{scenes}{caps}<div class="footer"><span>Medical AI Teacher</span><span>{qid}</span></div></div><script>{js}</script></body></html>')
+              texts=[f'Read the question carefully. {q["question"]} The options are '+', '.join(f'option {chr(65+i)}: {o}' for i,o in enumerate(q['options']))+'. Dr. Anas proposes '+answer+'.',f'Correct. The answer is '+answer+'. Focus on the wording of the question and the tested concept.',f'Clinical reasoning. The key tested choice is '+answer+'. Use the stem and compare the options systematically.',f'Why are the other choices wrong? Compare each distractor with the stem. The best answer is '+answer+'.',f'Exam trap. Read whether the stem asks for an exception, the best answer, or a true statement. Here the answer is '+answer+'.',f'Take-home. Remember the correct choice: '+answer+'. This completes the explanation for '+qid+'.']
+              for i,t in enumerate(texts,1): open(f'{work}/{i:02d}.txt','w').write(t)
+          PY
           fit_audio() {
-            local src="$1" dst="$2" target="$3"
-            local dur ratio
+            local src="$1" dst="$2" target="$3" dur ratio
             dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$src")
-            ratio=$(awk -v d="$dur" -v t="$target" 'BEGIN { r=d/t; if (r<0.5) r=0.5; if (r>2) r=2; printf "%.6f", r }')
+            ratio=$(awk -v d="$dur" -v t="$target" 'BEGIN{r=d/t;if(r<0.5)r=0.5;if(r>2)r=2;printf "%.6f",r}')
             ffmpeg -y -v error -i "$src" -af "atempo=${ratio},apad" -t "$target" -ar 48000 -ac 2 -c:a pcm_s16le "$dst"
           }
-          fit_audio production/audio/01.wav production/audio/01-fit.wav 10
-          fit_audio production/audio/02.wav production/audio/02-fit.wav 8
-          fit_audio production/audio/03.wav production/audio/03-fit.wav 12
-          fit_audio production/audio/04.wav production/audio/04-fit.wav 12
-          fit_audio production/audio/05.wav production/audio/05-fit.wav 10
-          fit_audio production/audio/06.wav production/audio/06-fit.wav 8
-          printf "file '%s'\n" "$PWD/production/audio/01-fit.wav" "$PWD/production/audio/02-fit.wav" "$PWD/production/audio/03-fit.wav" "$PWD/production/audio/04-fit.wav" "$PWD/production/audio/05-fit.wav" "$PWD/production/audio/06-fit.wav" > production/audio/concat.txt
-          ffmpeg -y -v error -f concat -safe 0 -i production/audio/concat.txt -t 60 -c:a pcm_s16le -ar 48000 -ac 2 production/render/master-voice.wav
-          ffmpeg -y -v error -i production/render/master-voice.wav -t 60 -c:a libmp3lame -b:a 160k production/render/master-voice.mp3
-          ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name -of json production/render/master-voice.mp3
-          test "$(ffprobe -v error -show_entries format=duration -of csv=p=0 production/render/master-voice.mp3 | cut -d. -f1)" = "60"
-      - name: Lint production composition
-        run: npx hyperframes lint production/render --verbose
-      - name: Visual inspect production composition
-        run: npx hyperframes inspect production/render --strict --json
-      - name: Render question 0001
-        run: npx hyperframes render production/render --output question-0001.mp4 --quality standard --fps 30
-      - name: Verify rendered media
-        run: |
-          set -euo pipefail
-          ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,width,height,r_frame_rate -of json question-0001.mp4
-          test "$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_type -of csv=p=0 question-0001.mp4)" = "audio"
-          test "$(ffprobe -v error -show_entries format=duration -of csv=p=0 question-0001.mp4 | cut -d. -f1)" = "60"
-      - name: Upload question 0001
+          for qdir in production/work/q*; do
+            echo "=== Producing $qdir ==="
+            mkdir -p "$qdir/audio"
+            for n in 01 02 03 04 05 06; do npx hyperframes tts "$qdir/$n.txt" --voice "$TTS_VOICE" --output "$qdir/audio/$n.wav"; test -s "$qdir/audio/$n.wav"; done
+            fit_audio "$qdir/audio/01.wav" "$qdir/audio/01-fit.wav" 10
+            fit_audio "$qdir/audio/02.wav" "$qdir/audio/02-fit.wav" 8
+            fit_audio "$qdir/audio/03.wav" "$qdir/audio/03-fit.wav" 12
+            fit_audio "$qdir/audio/04.wav" "$qdir/audio/04-fit.wav" 12
+            fit_audio "$qdir/audio/05.wav" "$qdir/audio/05-fit.wav" 10
+            fit_audio "$qdir/audio/06.wav" "$qdir/audio/06-fit.wav" 8
+            printf "file '%s'\n" "$PWD/$qdir/audio/01-fit.wav" "$PWD/$qdir/audio/02-fit.wav" "$PWD/$qdir/audio/03-fit.wav" "$PWD/$qdir/audio/04-fit.wav" "$PWD/$qdir/audio/05-fit.wav" "$PWD/$qdir/audio/06-fit.wav" > "$qdir/concat.txt"
+            ffmpeg -y -v error -f concat -safe 0 -i "$qdir/concat.txt" -t 60 -c:a pcm_s16le -ar 48000 -ac 2 "$qdir/master-voice.wav"
+            ffmpeg -y -v error -i "$qdir/master-voice.wav" -t 60 -c:a libmp3lame -b:a 160k "$qdir/master-voice.mp3"
+            test "$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$qdir/master-voice.mp3" | cut -d. -f1)" = "60"
+            npx hyperframes lint "$qdir" --verbose
+            npx hyperframes inspect "$qdir" --strict --json
+            num=$(basename "$qdir" | tr -cd '0-9')
+            npx hyperframes render "$qdir" --output "production/output/question-${num}.mp4" --quality standard --fps 30
+            ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,width,height,r_frame_rate -of json "production/output/question-${num}.mp4"
+            test "$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_type -of csv=p=0 "production/output/question-${num}.mp4")" = "audio"
+            test "$(ffprobe -v error -show_entries format=duration -of csv=p=0 "production/output/question-${num}.mp4" | cut -d. -f1)" = "60"
+          done
+      - name: Upload Batch 001
         uses: actions/upload-artifact@v4
         with:
-          name: medical-ai-teacher-question-0001
-          path: question-0001.mp4
+          name: medical-ai-teacher-batch-001
+          path: production/output/*.mp4
           if-no-files-found: error
           retention-days: 14
