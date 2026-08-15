@@ -20,15 +20,19 @@ jobs:
           set -euo pipefail
           mkdir -p production/master-dialogue/audio production/master-dialogue/output
           urls=(
-            'https://www.aidocmaker.com/g0/audio?name=1aff5d3bf9944dc99d54514d4ab51e5d'
-            'https://www.aidocmaker.com/g0/audio?name=267da157e38a48aa9a200a053835ba8e'
-            'https://www.aidocmaker.com/g0/audio?name=a3e47c1eda934debb093345b6f90a38b'
-            'https://www.aidocmaker.com/g0/audio?name=a39b59509da14751b2b39a3a5af4f58b'
-            'https://www.aidocmaker.com/g0/audio?name=137d093582e2485d8f10d8922c41dd0a'
-            'https://www.aidocmaker.com/g0/audio?name=f4470092188a4c78b421cec23d4265df'
+            'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/a82ceb86-34b7-4709-a783-bc4184ce3af5.mp3'
+            'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/cce18d16-39b0-4803-bf40-a4be58d7e729.mp3'
+            'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/b3db6a2d-dd78-43ec-b34c-e29d338e3baf.mp3'
+            'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/8752b735-99d8-4b08-9df3-505d395e4f90.mp3'
+            'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/9e3ea25b-343a-4db7-a221-8163106f7882.mp3'
+            'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/bef14e66-c57f-4726-a8f1-c89388c6147e.mp3'
           )
           i=1
-          for u in "${urls[@]}"; do curl -L --fail --retry 5 --retry-delay 3 "$u" -o "production/master-dialogue/audio/$i.mp3"; test -s "production/master-dialogue/audio/$i.mp3"; i=$((i+1)); done
+          for u in "${urls[@]}"; do
+            curl -L --fail --retry 5 --retry-delay 3 "$u" -o "production/master-dialogue/audio/$i.mp3"
+            test -s "production/master-dialogue/audio/$i.mp3"
+            i=$((i+1))
+          done
           for i in 1 2 3 4 5 6; do ffmpeg -y -v error -i "production/master-dialogue/audio/$i.mp3" -ar 48000 -ac 2 "production/master-dialogue/audio/$i.wav"; done
           printf "file '%s'\n" "$PWD/production/master-dialogue/audio/1.wav" "$PWD/production/master-dialogue/audio/2.wav" "$PWD/production/master-dialogue/audio/3.wav" "$PWD/production/master-dialogue/audio/4.wav" "$PWD/production/master-dialogue/audio/5.wav" "$PWD/production/master-dialogue/audio/6.wav" > production/master-dialogue/concat.txt
           ffmpeg -y -v error -f concat -safe 0 -i production/master-dialogue/concat.txt -af 'apad' -t 60 -ar 48000 -ac 2 -c:a libmp3lame -b:a 160k production/master-dialogue/master-voice.mp3
