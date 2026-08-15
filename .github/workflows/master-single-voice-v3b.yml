@@ -1,0 +1,61 @@
+name: Master Single Voice V3B
+
+on:
+  push:
+    branches: ["agent/import-full-question-bank"]
+    paths: [".github/workflows/master-single-voice-v3b.yml"]
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install FFmpeg
+        run: sudo apt-get update -y && sudo apt-get install -y ffmpeg curl
+      - name: Build valid Arabic voice
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p production/master-single-v3b/audio production/master-single-v3b/output
+          urls=(
+            'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/8ea448b3-8c3e-4e62-9104-c49464089a90.mp3'
+            'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/1dc4bc28-74a5-4878-8a9c-8b45060c2a7a.mp3'
+            'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/3cc47193-4d48-481c-ab0c-180ddf49fee7.mp3'
+            'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/66159e6e-bfc0-4254-b360-546fa999c354.mp3'
+          )
+          i=1
+          for u in "${urls[@]}"; do curl -L --fail --retry 5 --retry-delay 2 "$u" -o "production/master-single-v3b/audio/$i.mp3"; ffmpeg -y -v error -i "production/master-single-v3b/audio/$i.mp3" -ar 48000 -ac 2 "production/master-single-v3b/audio/$i.wav"; i=$((i+1)); done
+          printf "file '%s'\n" "$PWD/production/master-single-v3b/audio/1.wav" "$PWD/production/master-single-v3b/audio/2.wav" "$PWD/production/master-single-v3b/audio/3.wav" "$PWD/production/master-single-v3b/audio/4.wav" > production/master-single-v3b/concat.txt
+          ffmpeg -y -v error -f concat -safe 0 -i production/master-single-v3b/concat.txt -af apad -t 60 -ar 48000 -ac 2 -c:a libmp3lame -b:a 160k production/master-single-v3b/teacher-voice.mp3
+          ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 production/master-single-v3b/teacher-voice.mp3
+      - name: Build visual explainer
+        shell: bash
+        run: |
+          cat > production/master-single-v3b/index.html <<'HTML'
+          <!doctype html><html lang="ar"><head><meta charset="utf-8"><style>
+          *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,sans-serif;background:#f5f1e8;color:#17222b}.stage{width:1920px;height:1080px;position:relative;background:linear-gradient(135deg,#f7f2e8,#e8f0ef)}.brand{position:absolute;top:35px;left:90px;right:90px;display:flex;justify-content:space-between;font-size:25px;font-weight:800;color:#2a6f70}.scene{position:absolute;inset:0;padding:125px 110px 80px;opacity:0;visibility:hidden;display:flex;flex-direction:column;gap:22px}.q{font-size:52px;font-weight:900;line-height:1.2;text-align:right;direction:rtl}.options{display:grid;grid-template-columns:1fr 1fr;gap:18px;direction:ltr}.opt{padding:25px 30px;border-radius:20px;background:#fff;border:3px solid #d5ddd9;font-size:34px;font-weight:800}.correct{border-color:#2a8b78;background:#e4f3ee}.note{padding:22px 28px;border-radius:20px;background:#fff;border-left:8px solid #2a8b78;font-size:31px;line-height:1.35;text-align:right;direction:rtl}.cards{display:flex;gap:24px;flex:1}.card{flex:1;background:#fff;border:2px solid #d5ddd9;border-radius:25px;padding:24px;display:flex;flex-direction:column;justify-content:center}.title{text-align:center;font-size:28px;font-weight:900;color:#2a6f70;margin-bottom:18px}.factors{display:flex;justify-content:center;gap:18px;flex-wrap:wrap}.factor{padding:20px 26px;border-radius:16px;background:#eef5f3;font-size:38px;font-weight:900}.vk{border:3px solid #d79d37}.nvk{border:3px solid #2a8b78}.answer{font-size:68px;text-align:center;font-weight:950;color:#227a68;direction:ltr}.tip{text-align:center;font-size:36px;font-weight:900;color:#a56d1a;direction:rtl}.footer{position:absolute;bottom:28px;left:100px;right:100px;text-align:center;color:#63706f;font-size:21px;direction:rtl}svg{width:100%;height:260px}
+          </style></head><body><div id="master" class="stage" data-composition-id="master-single-v3b" data-start="0" data-duration="60" data-fps="30" data-width="1920" data-height="1080"><audio src="teacher-voice.mp3" data-start="0" data-duration="60"></audio><div class="brand"><span>MEDICAL AI TEACHER</span><span>QUESTION 0001 · VISUAL EXPLAINER</span></div>
+          <section class="scene" data-start="0" data-duration="10"><div class="q">في obstructive jaundice، أي clotting factor لا يعتمد على Vitamin K؟</div><div class="options"><div class="opt">A — Factor II</div><div class="opt">B — Factor VII</div><div class="opt">C — Factor VIII</div><div class="opt">D — Factor IX</div></div><div class="note">نقرأ السؤال والخيارات أولًا، ثم نبحث عن الاستثناء.</div><div class="footer">Question → Options → Reasoning</div></section>
+          <section class="scene" data-start="10" data-duration="10"><div class="q">خلينا نفهم الـmechanism.</div><div class="cards"><div class="card"><div class="title">Obstructive jaundice</div><svg viewBox="0 0 650 260"><path d="M80 95Q170 35 330 60Q500 75 590 135Q500 205 325 205Q155 205 80 145Z" fill="#b47b5b" stroke="#d79d37" stroke-width="6"/><path d="M330 125L470 145L590 145" stroke="#2a8b78" stroke-width="14" fill="none" stroke-linecap="round"/><circle cx="470" cy="145" r="18" fill="#d79d37"/><text x="170" y="140" font-size="30" fill="#fff">Liver</text><text x="420" y="120" font-size="25" fill="#fff">Bile duct</text></svg></div><div class="card"><div class="title">Vitamin K dependent</div><div class="factors"><span class="factor vk">II</span><span class="factor vk">VII</span><span class="factor vk">IX</span><span class="factor vk">X</span></div></div></div><div class="note">Obstruction يقلل وصول bile إلى الأمعاء، وبالتالي يقل امتصاص Vitamin K.</div><div class="footer">Visual mechanism</div></section>
+          <section class="scene" data-start="20" data-duration="10"><div class="q">احفظ المجموعة: II، VII، IX، X</div><div class="cards"><div class="card"><div class="title">Vitamin K dependent</div><div class="factors"><span class="factor vk">II</span><span class="factor vk">VII</span><span class="factor vk">IX</span><span class="factor vk">X</span></div></div><div class="card"><div class="title">الاستثناء</div><div class="answer">VIII</div></div></div><div class="note">إذا كان السؤال يطلب العامل الذي لا يعتمد على Vitamin K، ابحث مباشرة عن VIII.</div><div class="footer">Pattern recognition</div></section>
+          <section class="scene" data-start="30" data-duration="10"><div class="q">نستخدم الاستبعاد.</div><div class="options"><div class="opt">A — II ✓</div><div class="opt">B — VII ✓</div><div class="opt correct">C — VIII ← الاستثناء</div><div class="opt">D — IX ✓</div></div><div class="note">II وVII وIX من المجموعة المعتمدة على Vitamin K، لذلك C هو الخيار المختلف.</div><div class="tip">Eliminate → Compare → Choose</div></section>
+          <section class="scene" data-start="40" data-duration="10"><div class="q">الإجابة الصحيحة</div><div class="answer">C — Factor VIII</div><div class="cards"><div class="card"><div class="title">Vitamin K dependent</div><div class="factors"><span class="factor vk">II</span><span class="factor vk">VII</span><span class="factor vk">IX</span><span class="factor vk">X</span></div></div><div class="card"><div class="title">Exception</div><div class="answer">VIII</div></div></div><div class="note">Factor VIII لا يعتمد على Vitamin K، ولذلك هو الإجابة الصحيحة.</div></section>
+          <section class="scene" data-start="50" data-duration="10"><div class="q">Exam Tip</div><div class="answer">II + VII + IX + X = Vitamin K</div><div class="tip">VIII = الاستثناء</div><div class="note">لا تحفظ الإجابة وحدها؛ اربطها بالـmechanism وبالمجموعة والاستثناء.</div><div class="footer">فهم → Reasoning → Answer → Take-home</div></section>
+          <script>(function(){const s=[...document.querySelectorAll('.scene')];function seek(t){s.forEach(x=>{const a=+x.dataset.start,b=a+ +x.dataset.duration,on=t>=a&&t<b;x.style.opacity=on?'1':'0';x.style.visibility=on?'visible':'hidden'})}window.__timelines=window.__timelines||{};window.__timelines.master={seek,progress:seek,totalDuration:60,duration:60};seek(0)})()</script></div></body></html>
+          HTML
+      - name: Lint inspect render
+        run: |
+          set -euo pipefail
+          npm install --no-save hyperframes
+          npx hyperframes lint production/master-single-v3b --verbose
+          npx hyperframes inspect production/master-single-v3b --strict --json
+          npx hyperframes render production/master-single-v3b --output production/master-single-v3b/output/question-0001-single-voice-ar-v3b.mp4 --quality standard --fps 30
+          ffprobe -v error -show_entries format=duration:stream=codec_type,codec_name,width,height -of json production/master-single-v3b/output/question-0001-single-voice-ar-v3b.mp4
+      - name: Upload V3B
+        uses: actions/upload-artifact@v4
+        with:
+          name: medical-ai-teacher-master-single-voice-ar-q0001-v3b
+          path: production/master-single-v3b/output/question-0001-single-voice-ar-v3b.mp4
+          retention-days: 14
