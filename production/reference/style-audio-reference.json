@@ -1,0 +1,55 @@
+{
+  "reference_type": "user_provided_video",
+  "source_file": "VIDEO-2026-08-15-08-25-13(2).mp4",
+  "role": "style_and_voice_reference_only",
+  "do_not_copy": ["source content", "source images", "source branding"],
+  "video_profile": {
+    "duration_seconds": 596.83,
+    "width": 910,
+    "height": 512,
+    "fps": 30,
+    "visual_character": "clean educational medical explainer",
+    "composition": "large centered headline, concise supporting explanation, simple medical illustrations/diagrams/tables, occasional photographic background with readable overlay cards",
+    "backgrounds": "warm cream/off-white for information slides; photographic backgrounds may be used when they improve clinical context",
+    "typography": "bold high-contrast headline typography; short labels; minimal text density; English and Arabic can coexist",
+    "graphics": "simple flat medical icons, diagrams, tables, arrows and highlighted values",
+    "lower_caption_style": "short centered caption/label near the lower portion of the frame, enclosed in a high-contrast box",
+    "motion": "subtle educational transitions; prioritize readability and stable framing over decorative motion",
+    "information_density": "one teaching point per visual beat"
+  },
+  "audio_profile": {
+    "codec": "AAC-LC",
+    "sample_rate_hz": 44100,
+    "channels": 2,
+    "measured_integrated_loudness_lufs": -16.22,
+    "measured_true_peak_dbtp": -0.16,
+    "measured_lra_lu": 2.90,
+    "target_integrated_loudness_lufs": -16.0,
+    "target_true_peak_dbtp": -1.5,
+    "target_lra_lu": 3.0,
+    "voice_character": "clear, calm, confident medical-teaching narration; natural pacing; articulate terminology; no exaggerated acting",
+    "mixing": "voice-forward, consistent loudness, clean pauses between teaching beats, no clipping"
+  },
+  "production_rules": {
+    "apply_to": "all future question-bank videos",
+    "master_template": "keep the existing 6-scene architecture while adapting its visual skin and audio mix toward this reference",
+    "scene_structure": [
+      "Question",
+      "Answer proposal",
+      "Clinical reasoning",
+      "Distractors",
+      "Exam trap",
+      "Take-home"
+    ],
+    "audio_goal": "match the reference loudness and perceived clarity, not the reference speaker identity",
+    "quality_gate": [
+      "clear narration",
+      "no clipping",
+      "captions synchronized to narration",
+      "stable visuals",
+      "one teaching point per beat",
+      "Arabic/English readability",
+      "consistent visual hierarchy"
+    ]
+  }
+}
