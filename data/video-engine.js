@@ -22,7 +22,12 @@ const VISUAL_DIRECTION = {
   TAKE_HOME: "Clean recap card with trigger, memory anchor and final answer. End with a concise exam takeaway."
 };
 
-const text = (parts = []) => parts.map((p) => p?.text || "").filter(Boolean).join(" ");
+const text = (dialogue = []) =>
+  dialogue
+    .flatMap((block) => block?.parts || [])
+    .map((part) => part?.text || "")
+    .filter(Boolean)
+    .join(" ");
 
 export function buildVideoPlan(scenes, question) {
   if (!Array.isArray(scenes) || scenes.length !== 6) {
