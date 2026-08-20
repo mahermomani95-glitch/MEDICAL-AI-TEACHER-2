@@ -13,9 +13,10 @@ The first demo question is taken from `All medical questions(4).pdf`, Surgery 20
 - source-fidelity QC
 - medical teaching layer
 - batch processing
-- character dialogue engine
+- character dialogue one teacher 
 - scene/visual generator
-- ElevenLabs voice adapter
+- any clear free voice engine 
 - final video renderer
+English speakers only 
 
 This starter intentionally does not expose API keys.
